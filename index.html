@@ -153,6 +153,7 @@ tbody tr:hover{background:#f8d4df}
 .kpis{
   display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px
 }
+.stock-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
 .kpi{
   background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;
   box-shadow:var(--shadow)
@@ -214,11 +215,12 @@ tbody tr:hover{background:#f8d4df}
 #estoque table{width:100%;min-width:0;table-layout:fixed}
 #estoque th,#estoque td{text-align:center;padding:6px 4px;font-size:10px;white-space:normal;overflow-wrap:anywhere}
 #estoque th:nth-child(1){width:20%}
-#estoque th:nth-child(2){width:30%}
-#estoque th:nth-child(3){width:10%}
-#estoque th:nth-child(4){width:8%}
-#estoque th:nth-child(5){width:18%}
+#estoque th:nth-child(2){width:20%}
+#estoque th:nth-child(3){width:12%}
+#estoque th:nth-child(4){width:10%}
+#estoque th:nth-child(5){width:8%}
 #estoque th:nth-child(6){width:14%}
+#estoque th:nth-child(7){width:16%}
 #estoque .stock-actions{display:flex;justify-content:center;gap:1px}
 #estoque .order-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;min-width:16px;padding:1px 0;margin:0;font-size:10px}
 
@@ -233,12 +235,14 @@ tbody tr:hover{background:#f8d4df}
   .app{padding:12px}
   .topbar{align-items:flex-start}.month{display:none}
   .dashboard-grid,.kpis{grid-template-columns:repeat(2,1fr)}
+  .stock-kpis{grid-template-columns:repeat(2,1fr)}
   .two-col{grid-template-columns:1fr}
   .table-wrap{overflow-x:auto}
   table{min-width:900px}
 }
 @media(max-width:500px){
   .dashboard-grid,.kpis{grid-template-columns:1fr}
+  .stock-kpis{grid-template-columns:1fr}
   .order-cards{grid-template-columns:1fr}
   .nav{overflow-x:auto}.nav button{white-space:nowrap}
   .form{grid-template-columns:1fr}.field.full{grid-column:auto}
@@ -298,11 +302,9 @@ tbody tr:hover{background:#f8d4df}
     </section>
 
     <section id="estoque" class="section">
-      <div class="kpis">
+      <div class="kpis stock-kpis">
         <div class="kpi"><div class="title">Produtos cadastrados</div><div class="value" id="stockCount">0</div><div class="sub">itens ativos</div></div>
-        <div class="kpi"><div class="title">Itens em baixa</div><div class="value" id="lowStock">0</div><div class="sub">abaixo do estoque mínimo</div></div>
         <div class="kpi"><div class="title">Valor do estoque</div><div class="value" id="stockValue">R$ 0,00</div><div class="sub">a preço de custo</div></div>
-        <div class="kpi"><div class="title">Categorias</div><div class="value" id="categoryCount">0</div><div class="sub">cadastradas automaticamente</div></div>
       </div>
       <div class="panel">
         <div class="panel-title">CONTROLE DE ESTOQUE</div>
@@ -315,7 +317,7 @@ tbody tr:hover{background:#f8d4df}
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Produto</th><th>Especificações</th><th>Estoque</th><th>Unid.</th><th>Custo</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Produto</th><th>Especificações</th><th>Marca</th><th>Estoque</th><th>Unid.</th><th>Custo</th><th>Ações</th></tr></thead>
             <tbody id="stockTable"></tbody>
           </table>
         </div>
@@ -428,6 +430,7 @@ if(!db.configProducts || !Array.isArray(db.configProducts)) db.configProducts = 
 db.configProducts = db.configProducts.map(item => typeof item === "string"
   ? {name:item,price:0,month:today().slice(0,7)}
   : {name:String(item.name || ""),price:Number(item.price) || 0,month:item.month || today().slice(0,7)});
+db.products = (Array.isArray(db.products) ? db.products : []).map(product => ({...product,brand:product.brand || ""}));
 db.orders = (Array.isArray(db.orders) ? db.orders : []).map(order => {
   if(!order.steps){
     order.steps = {
@@ -477,21 +480,18 @@ function renderStock(){
   const filter=document.getElementById("stockFilter")?.value||"";
   const rows=db.products.filter(p=>{
     const [cls]=statusProduct(p);
-    return (p.name+" "+p.cat+" "+p.spec).toLowerCase().includes(q) && (!filter || cls===filter);
+    return (p.name+" "+p.cat+" "+p.spec+" "+p.brand).toLowerCase().includes(q) && (!filter || cls===filter);
   });
-  const low=db.products.filter(p=>p.stock<=p.min && p.stock>0).length;
   document.getElementById("stockCount").textContent=db.products.length;
-  document.getElementById("lowStock").textContent=low;
   document.getElementById("stockValue").textContent=money(db.products.reduce((s,p)=>s+p.stock*p.cost,0));
-  document.getElementById("categoryCount").textContent=new Set(db.products.map(p=>p.cat)).size;
   document.getElementById("stockTable").innerHTML=rows.map(p=>{
     return `<tr>
-      <td><b>${esc(p.name)}</b></td><td>${esc(p.spec)}</td>
+      <td><b>${esc(p.name)}</b></td><td>${esc(p.spec)}</td><td>${esc(p.brand)}</td>
       <td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td>
       <td><div class="stock-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button>
       <button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></div></td>
     </tr>`
-  }).join("") || `<tr><td colspan="6" class="empty">Nenhum produto encontrado.</td></tr>`;
+  }).join("") || `<tr><td colspan="7" class="empty">Nenhum produto encontrado.</td></tr>`;
 }
 function renderOrders(){
   const q=(document.getElementById("orderSearch")?.value||"").toLowerCase();
@@ -573,24 +573,23 @@ function runConfirmation(){
   if(action) action();
 }
 function openProduct(id){
-  const p=db.products.find(x=>x.id===id)||{id:"",name:"",cat:"",spec:"",stock:0,unit:"unid",cost:0,price:0,min:1};
+  const p=db.products.find(x=>x.id===id)||{id:"",name:"",cat:"",brand:"",spec:"",stock:0,unit:"unid",cost:0,price:0,min:1};
   openModal(id?"Editar produto":"Novo produto",`
   <form class="form" onsubmit="saveProduct(event,'${id||""}')">
     <div class="field"><label>Produto</label><input class="input" name="name" required value="${esc(p.name)}"></div>
-    <div class="field"><label>Categoria</label><input class="input" name="cat" required value="${esc(p.cat)}" placeholder="Doces, Ingredientes..."></div>
     <div class="field full"><label>Especificação</label><input class="input" name="spec" value="${esc(p.spec)}" placeholder="Ex.: Pacote 1kg / 250ml / Unidade"></div>
-    <div class="field"><label>Estoque atual</label><input class="input" name="stock" type="number" step="0.01" required value="${p.stock}"></div>
+    <div class="field"><label>Marca</label><input class="input" name="brand" value="${esc(p.brand)}" placeholder="Marca do produto"></div>
+    <div class="field"><label>Quantidade</label><input class="input" name="stock" type="number" step="1" required value="${Math.round(Number(p.stock)||0)}"></div>
     <div class="field"><label>Unidade</label><select class="select" name="unit"><option ${p.unit==="unid"?"selected":""}>unid</option><option ${p.unit==="kg"?"selected":""}>kg</option><option ${p.unit==="g"?"selected":""}>g</option><option ${p.unit==="L"?"selected":""}>L</option><option ${p.unit==="cx"?"selected":""}>cx</option></select></div>
     <div class="field"><label>Custo</label><input class="input" name="cost" type="number" step="0.01" value="${p.cost}"></div>
-    <div class="field"><label>Preço de venda</label><input class="input" name="price" type="number" step="0.01" value="${p.price}"></div>
-    <div class="field"><label>Estoque mínimo</label><input class="input" name="min" type="number" step="0.01" value="${p.min}"></div>
     <div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar produto</button></div>
   </form>`);
 }
 function saveProduct(e,id){
   e.preventDefault();const f=new FormData(e.target);
-  const obj={id:id||uid(),name:f.get("name"),cat:f.get("cat"),spec:f.get("spec"),stock:+f.get("stock"),unit:f.get("unit"),cost:+f.get("cost"),price:+f.get("price"),min:+f.get("min")};
-  if(id) db.products=db.products.map(p=>p.id===id?obj:p); else db.products.push(obj);
+  const existing=db.products.find(p=>p.id===id);
+  const obj={id:id||uid(),name:f.get("name"),cat:existing?.cat||"",brand:f.get("brand"),spec:f.get("spec"),stock:Math.round(Number(f.get("stock"))||0),unit:f.get("unit"),cost:+f.get("cost"),min:existing?.min??1};
+  if(id) db.products=db.products.map(p=>p.id===id?{...obj,price:p.price}:p); else db.products.push({...obj,price:0});
   closeModal();save();
 }
 function deleteProduct(id){
