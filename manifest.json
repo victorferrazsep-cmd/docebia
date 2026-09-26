@@ -1,11 +1,11 @@
 {
-  "name": "Doce Gestão",
-  "short_name": "Doce Gestão",
+  "name": "Doce Bia",
+  "short_name": "Doce Bia",
   "start_url": "index.html",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#fff7f8",
   "theme_color": "#e56b91",
-  "description": "Aplicativo de gestão de estoque, pedidos e fluxo de caixa para uma doceria.",
+  "description": "Fluxo de caixa, controle de estoque e vendas da DoceBia.",
   "icons": [
     {
       "src": "assets/logo.png",
