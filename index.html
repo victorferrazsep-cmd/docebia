@@ -214,15 +214,20 @@ tbody tr:hover{background:#f8d4df}
 #estoque .table-wrap{overflow-x:hidden}
 #estoque table{width:100%;min-width:0;table-layout:fixed}
 #estoque th,#estoque td{text-align:center;padding:6px 4px;font-size:10px;white-space:normal;overflow-wrap:anywhere}
-#estoque th:nth-child(1){width:20%}
-#estoque th:nth-child(2){width:20%}
-#estoque th:nth-child(3){width:12%}
-#estoque th:nth-child(4){width:10%}
-#estoque th:nth-child(5){width:8%}
+#estoque th:nth-child(1){width:15%}
+#estoque th:nth-child(2){width:17%}
+#estoque th:nth-child(3){width:13%}
+#estoque th:nth-child(4){width:8%}
+#estoque th:nth-child(5){width:7%}
 #estoque th:nth-child(6){width:14%}
-#estoque th:nth-child(7){width:16%}
+#estoque th:nth-child(7){width:14%}
+#estoque th:nth-child(8){width:12%}
 #estoque .stock-actions{display:flex;justify-content:center;gap:1px}
-#estoque .order-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;min-width:16px;padding:1px 0;margin:0;font-size:10px}
+#estoque td:nth-child(7){padding-left:0;padding-right:0}
+#estoque .stock-finished-cell{padding-left:2px;padding-right:2px}
+#estoque .stock-finished-control{display:flex;flex-direction:column;align-items:center;gap:3px}
+#estoque .stock-finished-control input{width:13px;height:13px;margin:0;accent-color:var(--pink-dark)}
+#estoque .order-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:14px;min-width:14px;padding:1px 0;margin:0;font-size:9px}
 
 .two-col{display:grid;grid-template-columns:1.4fr .8fr;gap:13px}
 .legend{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px}
@@ -276,7 +281,7 @@ tbody tr:hover{background:#f8d4df}
   <main>
     <section id="dashboard" class="section active">
       <div class="dashboard-grid">
-        <div class="card"><span class="ico">📦</span><label>Itens em estoque</label><strong id="dashItems">0</strong><small> produtos cadastrados</small></div>
+        <div class="card"><span class="ico">📦</span><label>Itens em estoque</label><strong id="dashItems">0</strong><small> produtos ativos</small></div>
         <div class="card"><span class="ico">🧁</span><label>Pedidos no mês</label><strong id="dashOrders">0</strong><small> pedidos registrados</small></div>
         <div class="card"><span class="ico">💵</span><label>Vendas recebidas</label><strong id="dashReceived">R$ 0,00</strong><small> no mês</small></div>
         <div class="card"><span class="ico">🔔</span><label>Pedidos pendentes</label><strong id="dashPending">0</strong><small> aguardando pagamento/produção</small></div>
@@ -303,8 +308,8 @@ tbody tr:hover{background:#f8d4df}
 
     <section id="estoque" class="section">
       <div class="kpis stock-kpis">
-        <div class="kpi"><div class="title">Produtos cadastrados</div><div class="value" id="stockCount">0</div><div class="sub">itens ativos</div></div>
-        <div class="kpi"><div class="title">Valor do estoque</div><div class="value" id="stockValue">R$ 0,00</div><div class="sub">a preço de custo</div></div>
+        <div class="kpi"><div class="title">Produtos ativos</div><div class="value" id="stockCount">0</div><div class="sub">itens no estoque</div></div>
+        <div class="kpi"><div class="title">Valor do estoque</div><div class="value" id="stockValue">R$ 0,00</div><div class="sub">itens em estoque</div></div>
       </div>
       <div class="panel">
         <div class="panel-title">CONTROLE DE ESTOQUE</div>
@@ -317,7 +322,7 @@ tbody tr:hover{background:#f8d4df}
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Produto</th><th>Especificações</th><th>Marca</th><th>Estoque</th><th>Unid.</th><th>Custo</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Produto</th><th>Especificações</th><th>Marca</th><th>Estoque</th><th>Unid.</th><th>Custo</th><th>Ações</th><th>Finalizado</th></tr></thead>
             <tbody id="stockTable"></tbody>
           </table>
         </div>
@@ -430,7 +435,7 @@ if(!db.configProducts || !Array.isArray(db.configProducts)) db.configProducts = 
 db.configProducts = db.configProducts.map(item => typeof item === "string"
   ? {name:item,price:0,month:today().slice(0,7)}
   : {name:String(item.name || ""),price:Number(item.price) || 0,month:item.month || today().slice(0,7)});
-db.products = (Array.isArray(db.products) ? db.products : []).map(product => ({...product,brand:product.brand || ""}));
+db.products = (Array.isArray(db.products) ? db.products : []).map(product => ({...product,brand:product.brand || "",purchaseDate:product.purchaseDate || "",finished:Boolean(product.finished)}));
 db.orders = (Array.isArray(db.orders) ? db.orders : []).map(order => {
   if(!order.steps){
     order.steps = {
@@ -459,7 +464,7 @@ function renderDashboard(){
   const sales=db.orders.reduce((s,o)=>s+o.total,0);
   const pending=db.orders.filter(o=>!o.steps.feito||!o.steps.pago||!o.steps.entregue).length;
   const balance=db.cash.reduce((s,c)=>s+(c.type==="Entrada"?c.value:-c.value),0);
-  document.getElementById("dashItems").textContent=db.products.length;
+  document.getElementById("dashItems").textContent=db.products.filter(p=>!p.finished).length;
   document.getElementById("dashOrders").textContent=db.orders.length;
   document.getElementById("dashReceived").textContent=money(received);
   document.getElementById("dashPending").textContent=pending;
@@ -469,7 +474,7 @@ function renderDashboard(){
 }
 function renderDashboardTable(){
   const q=(document.getElementById("dashSearch")?.value||"").toLowerCase();
-  const rows=db.products.filter(p=>(p.name+" "+p.cat).toLowerCase().includes(q)).slice(0,10);
+  const rows=db.products.filter(p=>!p.finished && (p.name+" "+p.cat).toLowerCase().includes(q)).slice(0,10);
   document.getElementById("dashboardTable").innerHTML=rows.map(p=>{
     const [cls,label]=statusProduct(p);
     return `<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.cat)}</td><td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td><td>${p.price?money(p.price):"—"}</td><td><span class="badge ${cls}">● ${label}</span></td></tr>`
@@ -482,16 +487,24 @@ function renderStock(){
     const [cls]=statusProduct(p);
     return (p.name+" "+p.cat+" "+p.spec+" "+p.brand).toLowerCase().includes(q) && (!filter || cls===filter);
   });
-  document.getElementById("stockCount").textContent=db.products.length;
-  document.getElementById("stockValue").textContent=money(db.products.reduce((s,p)=>s+p.stock*p.cost,0));
+  const activeProducts=db.products.filter(p=>!p.finished);
+  document.getElementById("stockCount").textContent=activeProducts.length;
+  document.getElementById("stockValue").textContent=money(activeProducts.reduce((s,p)=>s+p.stock*p.cost,0));
   document.getElementById("stockTable").innerHTML=rows.map(p=>{
     return `<tr>
       <td><b>${esc(p.name)}</b></td><td>${esc(p.spec)}</td><td>${esc(p.brand)}</td>
       <td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td>
       <td><div class="stock-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button>
       <button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></div></td>
+      <td class="stock-finished-cell"><div class="stock-finished-control"><input type="checkbox" ${p.finished?"checked":""} aria-label="Marcar ${esc(p.name)} como finalizado" onchange="toggleProductFinished('${p.id}',this.checked)"></div></td>
     </tr>`
-  }).join("") || `<tr><td colspan="7" class="empty">Nenhum produto encontrado.</td></tr>`;
+  }).join("") || `<tr><td colspan="8" class="empty">Nenhum produto encontrado.</td></tr>`;
+}
+function toggleProductFinished(id,finished){
+  const product=db.products.find(item=>item.id===id);
+  if(!product) return;
+  product.finished=finished;
+  save();
 }
 function renderOrders(){
   const q=(document.getElementById("orderSearch")?.value||"").toLowerCase();
@@ -573,13 +586,14 @@ function runConfirmation(){
   if(action) action();
 }
 function openProduct(id){
-  const p=db.products.find(x=>x.id===id)||{id:"",name:"",cat:"",brand:"",spec:"",stock:0,unit:"unid",cost:0,price:0,min:1};
+  const p=db.products.find(x=>x.id===id)||{id:"",name:"",cat:"",brand:"",spec:"",stock:0,unit:"unid",cost:0,price:0,min:1,purchaseDate:today()};
   openModal(id?"Editar produto":"Novo produto",`
   <form class="form" onsubmit="saveProduct(event,'${id||""}')">
     <div class="field"><label>Produto</label><input class="input" name="name" required value="${esc(p.name)}"></div>
     <div class="field full"><label>Especificação</label><input class="input" name="spec" value="${esc(p.spec)}" placeholder="Ex.: Pacote 1kg / 250ml / Unidade"></div>
     <div class="field"><label>Marca</label><input class="input" name="brand" value="${esc(p.brand)}" placeholder="Marca do produto"></div>
     <div class="field"><label>Quantidade</label><input class="input" name="stock" type="number" step="1" required value="${Math.round(Number(p.stock)||0)}"></div>
+    <div class="field"><label>Data da compra do estoque</label><input class="input" name="purchaseDate" type="date" value="${esc(p.purchaseDate)}"></div>
     <div class="field"><label>Unidade</label><select class="select" name="unit"><option ${p.unit==="unid"?"selected":""}>unid</option><option ${p.unit==="kg"?"selected":""}>kg</option><option ${p.unit==="g"?"selected":""}>g</option><option ${p.unit==="L"?"selected":""}>L</option><option ${p.unit==="cx"?"selected":""}>cx</option></select></div>
     <div class="field"><label>Custo</label><input class="input" name="cost" type="number" step="0.01" value="${p.cost}"></div>
     <div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar produto</button></div>
@@ -588,7 +602,7 @@ function openProduct(id){
 function saveProduct(e,id){
   e.preventDefault();const f=new FormData(e.target);
   const existing=db.products.find(p=>p.id===id);
-  const obj={id:id||uid(),name:f.get("name"),cat:existing?.cat||"",brand:f.get("brand"),spec:f.get("spec"),stock:Math.round(Number(f.get("stock"))||0),unit:f.get("unit"),cost:+f.get("cost"),min:existing?.min??1};
+  const obj={id:id||uid(),name:f.get("name"),cat:existing?.cat||"",brand:f.get("brand"),spec:f.get("spec"),stock:Math.round(Number(f.get("stock"))||0),purchaseDate:f.get("purchaseDate"),unit:f.get("unit"),cost:+f.get("cost"),min:existing?.min??1,finished:existing?.finished??false};
   if(id) db.products=db.products.map(p=>p.id===id?{...obj,price:p.price}:p); else db.products.push({...obj,price:0});
   closeModal();save();
 }
