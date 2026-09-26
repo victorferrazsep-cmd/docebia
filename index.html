@@ -47,11 +47,12 @@ button{cursor:pointer}
 }
 .brand{display:flex;align-items:center;gap:12px}
 .logo{
-  width:55px;height:55px;border-radius:0;
+  width:68px;height:68px;border-radius:0;
   display:block;object-fit:contain;padding:0;
   background:transparent;box-shadow:none;border:0
 }
 .brand h1{font-size:21px;margin:0;color:var(--brown)}
+.brand h1 .brand-heart{font-size:0.7em;vertical-align:middle;display:inline-block;transform:translateY(-2px)}
 .brand small{color:var(--muted);font-size:12px}
 .month{
   display:flex;align-items:center;gap:8px;
@@ -65,6 +66,15 @@ button{cursor:pointer}
   box-shadow:0 3px 8px rgba(100,50,40,.08)
 }
 .icon-btn.active{background:#e66b91;color:#fff}
+.config-layout{display:grid;gap:14px;padding:16px}
+.config-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.config-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.config-header h3{margin:0;font-size:15px;color:var(--brown)}
+.config-list{display:grid;gap:10px;max-height:380px;overflow:auto}
+.config-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border:1px solid #f1d9df;border-radius:10px;background:#fff9fb}
+.config-item strong{display:block;color:var(--brown)}
+.config-item small{color:var(--muted)}
+.config-actions{display:flex;gap:8px;flex-wrap:wrap}
 
 .nav{
   display:flex;gap:7px;align-items:center;margin:5px 0 13px;
@@ -171,20 +181,35 @@ tbody tr:hover{background:#f8d4df}
 .field{display:flex;flex-direction:column;gap:5px}
 .field.full{grid-column:1/-1}
 .field label{font-size:11px;font-weight:800;color:#744632}
+.field-inline{display:grid;grid-template-columns:1.5fr .7fr;gap:8px;align-items:end}
+.field-inline .field{margin:0}
+.field-compact{padding:8px 10px;border:1px solid #e8cbd4;background:#fffafa;border-radius:8px;color:var(--text);font-weight:700;min-height:38px;display:flex;align-items:center;justify-content:center}
+.order-item-head,.order-item-row{display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px;align-items:center}
+.order-item-head{margin-bottom:5px}
+.order-item-head label{font-size:11px;font-weight:800;color:#744632}
+.order-item-row{margin-bottom:7px}
+.order-item-quantity{width:100%;min-width:0;text-align:center}
+.btn-add-item{justify-self:start;padding:6px 9px;font-size:11px;margin-top:2px}
 .modal-footer{padding:0 17px 17px;display:flex;justify-content:flex-end;gap:8px}
 
 .order-cards{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px
 }
 .order{
-  background:#fff;border:1px solid #eed6dd;border-radius:12px;padding:13px;
+  background:#fff;border:1px solid #eed6dd;border-radius:10px;padding:10px;
   box-shadow:0 3px 10px rgba(90,40,30,.06)
 }
-.order-top{display:flex;justify-content:space-between;gap:10px}
-.order h3{margin:0;font-size:14px;color:#71351f}
-.order p{font-size:11px;color:var(--muted);margin:5px 0}
-.order-total{font-weight:900;font-size:18px;margin:12px 0 8px;color:#8c3c59}
-.order-actions{display:flex;gap:6px}
+.order-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.order h3{margin:0;font-size:13px;color:#71351f}
+.order p{font-size:10px;color:var(--muted);margin:4px 0;overflow-wrap:anywhere}
+.order-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:7px}
+.order-total{font-weight:900;font-size:16px;color:#8c3c59}
+.order-actions{display:flex;gap:5px}
+.order-icon-btn{min-width:30px;padding:4px 7px;font-size:13px;line-height:1.2}
+.order-stage-selector{display:flex;gap:7px;flex-wrap:wrap}
+.order-stage-selector label{display:flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #eed6dd;border-radius:8px;background:#fff9fb;font-size:11px;font-weight:800;color:#744632}
+.order-stage-selector input{margin:0;accent-color:var(--pink-dark)}
+.order-stage-badges{display:flex;justify-content:flex-end;gap:5px;flex-wrap:wrap;margin:0}
 
 .two-col{display:grid;grid-template-columns:1.4fr .8fr;gap:13px}
 .legend{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px}
@@ -192,19 +217,18 @@ tbody tr:hover{background:#f8d4df}
 
 @media(max-width:1150px){
   .dashboard-grid{grid-template-columns:repeat(3,1fr)}
-  .order-cards{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:800px){
   .app{padding:12px}
   .topbar{align-items:flex-start}.month{display:none}
   .dashboard-grid,.kpis{grid-template-columns:repeat(2,1fr)}
   .two-col{grid-template-columns:1fr}
-  .order-cards{grid-template-columns:1fr}
   .table-wrap{overflow-x:auto}
   table{min-width:900px}
 }
 @media(max-width:500px){
   .dashboard-grid,.kpis{grid-template-columns:1fr}
+  .order-cards{grid-template-columns:1fr}
   .nav{overflow-x:auto}.nav button{white-space:nowrap}
   .form{grid-template-columns:1fr}.field.full{grid-column:auto}
 }
@@ -216,13 +240,13 @@ tbody tr:hover{background:#f8d4df}
     <div class="brand">
       <img class="logo" src="logo.png" alt="Logo Doce Bia">
       <div>
-        <h1>doce🩷bia</h1>
+        <h1>doce<span class="brand-heart">🩷</span>bia</h1>
         <small>Gestão & Fluxo de Caixa</small>
       </div>
     </div>
     <div class="month">MÊS: <span id="monthName">SETEMBRO</span></div>
     <div class="top-actions">
-      <button class="icon-btn" title="Backup" onclick="exportData()">☁️</button>
+      <button class="icon-btn" title="Configurações" onclick="openSettings()">⚙️</button>
       <button class="icon-btn active" title="Novo lançamento" onclick="openQuick()">🏷️</button>
     </div>
   </header>
@@ -280,7 +304,7 @@ tbody tr:hover{background:#f8d4df}
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Produto</th><th>Categoria</th><th>Especificações</th><th>Estoque</th><th>Unid.</th><th>Custo</th><th>Preço Venda</th><th>Mín.</th><th>Status</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Produto</th><th>Especificações</th><th>Estoque</th><th>Unid.</th><th>Custo</th><th>Mín.</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody id="stockTable"></tbody>
           </table>
         </div>
@@ -292,14 +316,14 @@ tbody tr:hover{background:#f8d4df}
         <div class="kpi"><div class="title">Pedidos</div><div class="value" id="orderCount">0</div><div class="sub">no mês</div></div>
         <div class="kpi"><div class="title">Recebido</div><div class="value" id="orderReceived">R$ 0,00</div><div class="sub">pagamentos confirmados</div></div>
         <div class="kpi"><div class="title">A receber</div><div class="value" id="orderToReceive">R$ 0,00</div><div class="sub">pagamentos pendentes</div></div>
-        <div class="kpi"><div class="title">Ticket médio</div><div class="value" id="ticket">R$ 0,00</div><div class="sub">por pedido</div></div>
+        <div class="kpi"><div class="title">Valor total</div><div class="value" id="orderTotal">R$ 0,00</div><div class="sub">soma dos pedidos</div></div>
       </div>
       <div class="panel">
         <div class="panel-title">PEDIDOS DA DOCERIA</div>
         <div class="toolbar">
           <div class="filters">
             <input class="input" id="orderSearch" placeholder="🔎 Cliente ou pedido..." oninput="renderOrders()">
-            <select class="select" id="orderFilter" onchange="renderOrders()"><option value="">Todos</option><option>Pago</option><option>Pendente</option><option>Produção</option><option>Pronto</option><option>Entregue</option></select>
+            <select class="select" id="orderFilter" onchange="renderOrders()"><option value="">Todos</option><option value="feito">Feito</option><option value="pago">Pago</option><option value="entregue">Entregue</option></select>
           </div>
           <button class="btn" onclick="openOrder()">+ Novo pedido</button>
         </div>
@@ -369,6 +393,7 @@ const today = () => new Date().toISOString().slice(0,10);
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
 const initial = {
+  configProducts:["Cone Doce de Leite","Cone Brigadeiro","Cone Beijinho"],
   products:[
     {id:uid(),name:"Brigadeiro Gourmet",cat:"Doces",spec:"Unidade 20g",stock:45,unit:"unid",cost:1.50,price:4.50,min:15},
     {id:uid(),name:"Cone Trufado",cat:"Doces",spec:"Chocolate + brigadeiro",stock:18,unit:"unid",cost:4.20,price:10.00,min:10},
@@ -388,6 +413,22 @@ const initial = {
   ]
 };
 let db = JSON.parse(localStorage.getItem(KEY)||"null") || initial;
+if(!db.configProducts || !Array.isArray(db.configProducts)) db.configProducts = [...initial.configProducts];
+db.configProducts = db.configProducts.map(item => typeof item === "string"
+  ? {name:item,price:0,month:today().slice(0,7)}
+  : {name:String(item.name || ""),price:Number(item.price) || 0,month:item.month || today().slice(0,7)});
+db.orders = (Array.isArray(db.orders) ? db.orders : []).map(order => {
+  if(!order.steps){
+    order.steps = {
+      feito:["Pronto","Entregue"].includes(order.status),
+      pago:order.status==="Pago",
+      entregue:order.status==="Entregue"
+    };
+  } else {
+    order.steps = {feito:Boolean(order.steps.feito),pago:Boolean(order.steps.pago),entregue:Boolean(order.steps.entregue)};
+  }
+  return order;
+});
 function save(){localStorage.setItem(KEY,JSON.stringify(db));refreshAll()}
 function money(v){return brl(v)}
 function monthLabel(){
@@ -400,9 +441,9 @@ function statusProduct(p){
 }
 function refreshAll(){renderDashboard();renderStock();renderOrders();renderCash()}
 function renderDashboard(){
-  const received=db.orders.filter(o=>o.status==="Pago").reduce((s,o)=>s+o.total,0);
+  const received=db.orders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0);
   const sales=db.orders.reduce((s,o)=>s+o.total,0);
-  const pending=db.orders.filter(o=>!["Pago","Entregue"].includes(o.status)).length;
+  const pending=db.orders.filter(o=>!o.steps.feito||!o.steps.pago||!o.steps.entregue).length;
   const balance=db.cash.reduce((s,c)=>s+(c.type==="Entrada"?c.value:-c.value),0);
   document.getElementById("dashItems").textContent=db.products.length;
   document.getElementById("dashOrders").textContent=db.orders.length;
@@ -435,36 +476,44 @@ function renderStock(){
   document.getElementById("stockTable").innerHTML=rows.map(p=>{
     const [cls,label]=statusProduct(p);
     return `<tr>
-      <td><b>${esc(p.name)}</b></td><td>${esc(p.cat)}</td><td>${esc(p.spec)}</td>
-      <td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td><td>${p.price?money(p.price):"—"}</td><td>${p.min}</td>
+      <td><b>${esc(p.name)}</b></td><td>${esc(p.spec)}</td>
+      <td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td><td>${p.min}</td>
       <td><span class="badge ${cls}">● ${label}</span></td>
-      <td><button class="btn small secondary" onclick="openProduct('${p.id}')">Editar</button>
-      <button class="btn small" onclick="deleteProduct('${p.id}')">Excluir</button></td>
+      <td><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button>
+      <button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></td>
     </tr>`
-  }).join("") || `<tr><td colspan="10" class="empty">Nenhum produto encontrado.</td></tr>`;
+  }).join("") || `<tr><td colspan="8" class="empty">Nenhum produto encontrado.</td></tr>`;
 }
 function renderOrders(){
   const q=(document.getElementById("orderSearch")?.value||"").toLowerCase();
   const filter=document.getElementById("orderFilter")?.value||"";
-  const rows=db.orders.filter(o=>(o.client+" "+o.items).toLowerCase().includes(q)&&(!filter||o.status===filter));
-  const received=db.orders.filter(o=>o.status==="Pago").reduce((s,o)=>s+o.total,0);
-  const toReceive=db.orders.filter(o=>o.status==="Pendente").reduce((s,o)=>s+o.total,0);
+  const rows=db.orders.filter(o=>(o.client+" "+o.items).toLowerCase().includes(q)&&(!filter||o.steps[filter]));
+  const received=db.orders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0);
+  const toReceive=db.orders.filter(o=>!o.steps.pago).reduce((s,o)=>s+o.total,0);
   document.getElementById("orderCount").textContent=db.orders.length;
   document.getElementById("orderReceived").textContent=money(received);
   document.getElementById("orderToReceive").textContent=money(toReceive);
-  document.getElementById("ticket").textContent=money(db.orders.length?db.orders.reduce((s,o)=>s+o.total,0)/db.orders.length:0);
-  document.getElementById("orderCards").innerHTML=rows.map(o=>`
+  document.getElementById("orderTotal").textContent=money(db.orders.reduce((s,o)=>s+o.total,0));
+  document.getElementById("orderCards").innerHTML=rows.map(o=>{
+    const complete=o.steps.feito&&o.steps.pago&&o.steps.entregue;
+    const steps=[['Feito',o.steps.feito],['Pago',o.steps.pago],['Entregue',o.steps.entregue]];
+    return `
     <article class="order">
-      <div class="order-top"><h3>Pedido #${o.id.slice(-5).toUpperCase()}</h3><span class="badge ${o.status==="Pago"||o.status==="Entregue"?"ok":o.status==="Pendente"?"warn":"info"}">${esc(o.status)}</span></div>
+      <div class="order-top">
+        <h3>${complete?"✓ ":""}Pedido #${o.id.slice(-5).toUpperCase()}</h3>
+        <div class="order-stage-badges">${steps.map(([label,done])=>`<span class="badge ${done?"ok":"warn"}">${done?"✓":"○"} ${label}</span>`).join("")}</div>
+      </div>
       <p>📅 ${formatDate(o.date)} • 👤 <b>${esc(o.client)}</b></p>
       <p>🧁 ${esc(o.items)}</p>
-      <p>💳 ${esc(o.payment)}</p>
-      <div class="order-total">${money(o.total)}</div>
-      <div class="order-actions">
-        <button class="btn small secondary" onclick="openOrder('${o.id}')">Editar</button>
-        <button class="btn small" onclick="deleteOrder('${o.id}')">Excluir</button>
+      <div class="order-footer">
+        <div class="order-total">${money(o.total)}</div>
+        <div class="order-actions">
+          <button class="btn small secondary order-icon-btn" aria-label="Editar pedido" title="Editar pedido" onclick="openOrder('${o.id}')">✎</button>
+          <button class="btn small order-icon-btn" aria-label="Excluir pedido" title="Excluir pedido" onclick="deleteOrder('${o.id}')">🗑</button>
+        </div>
       </div>
-    </article>`).join("") || `<div class="empty">Nenhum pedido encontrado.</div>`;
+    </article>`;
+  }).join("") || `<div class="empty">Nenhum pedido encontrado.</div>`;
 }
 function renderCash(){
   const q=(document.getElementById("cashSearch")?.value||"").toLowerCase();
@@ -502,7 +551,7 @@ function openProduct(id){
     <div class="field full"><label>Especificação</label><input class="input" name="spec" value="${esc(p.spec)}" placeholder="Ex.: Pacote 1kg / 250ml / Unidade"></div>
     <div class="field"><label>Estoque atual</label><input class="input" name="stock" type="number" step="0.01" required value="${p.stock}"></div>
     <div class="field"><label>Unidade</label><select class="select" name="unit"><option ${p.unit==="unid"?"selected":""}>unid</option><option ${p.unit==="kg"?"selected":""}>kg</option><option ${p.unit==="g"?"selected":""}>g</option><option ${p.unit==="L"?"selected":""}>L</option><option ${p.unit==="cx"?"selected":""}>cx</option></select></div>
-    <div class="field"><label>Custo unitário</label><input class="input" name="cost" type="number" step="0.01" value="${p.cost}"></div>
+    <div class="field"><label>Custo</label><input class="input" name="cost" type="number" step="0.01" value="${p.cost}"></div>
     <div class="field"><label>Preço de venda</label><input class="input" name="price" type="number" step="0.01" value="${p.price}"></div>
     <div class="field"><label>Estoque mínimo</label><input class="input" name="min" type="number" step="0.01" value="${p.min}"></div>
     <div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar produto</button></div>
@@ -518,21 +567,62 @@ function deleteProduct(id){
   if(confirm("Excluir este produto?")){db.products=db.products.filter(p=>p.id!==id);save()}
 }
 function openOrder(id){
-  const o=db.orders.find(x=>x.id===id)||{id:"",date:today(),client:"",items:"",total:0,payment:"Pix",status:"Pendente"};
+  const o=db.orders.find(x=>x.id===id)||{id:"",date:today(),client:"",items:"",total:0,steps:{feito:true,pago:false,entregue:false}};
+  const orderRows = o.items ? String(o.items).split(" | ").map(item => {
+    const match = item.match(/^\s*(\d+)\s*x\s*(.*)$/i);
+    return {quantity:match ? match[1] : 1,name:match ? match[2].trim() : item.trim()};
+  }) : [{quantity:1,name:""}];
   openModal(id?"Editar pedido":"Novo pedido",`
   <form class="form" onsubmit="saveOrder(event,'${id||""}')">
     <div class="field"><label>Data</label><input class="input" type="date" name="date" value="${o.date}" required></div>
     <div class="field"><label>Cliente</label><input class="input" name="client" value="${esc(o.client)}" required></div>
-    <div class="field full"><label>Itens do pedido</label><input class="input" name="items" value="${esc(o.items)}" required placeholder="Ex.: 10 brigadeiros + 1 bolo"></div>
-    <div class="field"><label>Total</label><input class="input" type="number" step="0.01" name="total" value="${o.total}" required></div>
-    <div class="field"><label>Forma de pagamento</label><select class="select" name="payment"><option ${o.payment==="Pix"?"selected":""}>Pix</option><option ${o.payment==="Dinheiro"?"selected":""}>Dinheiro</option><option ${o.payment==="Cartão"?"selected":""}>Cartão</option><option ${o.payment==="Transferência"?"selected":""}>Transferência</option></select></div>
-    <div class="field"><label>Status</label><select class="select" name="status"><option ${o.status==="Pendente"?"selected":""}>Pendente</option><option ${o.status==="Pago"?"selected":""}>Pago</option><option ${o.status==="Produção"?"selected":""}>Produção</option><option ${o.status==="Pronto"?"selected":""}>Pronto</option><option ${o.status==="Entregue"?"selected":""}>Entregue</option></select></div>
+    <div class="field full">
+      <div class="order-item-head"><label>Qntd Itens</label><label>Item do pedido</label></div>
+      <div id="orderItemRows"></div>
+      <button type="button" class="btn secondary btn-add-item" onclick="addOrderItemRow()">Adicionar mais itens</button>
+    </div>
+    <div class="field full"><label>Esteira de status</label><div class="order-stage-selector">
+      <label><input type="checkbox" name="feito" ${o.steps.feito?"checked":""}> Feito</label>
+      <label><input type="checkbox" name="pago" ${o.steps.pago?"checked":""}> Pago</label>
+      <label><input type="checkbox" name="entregue" ${o.steps.entregue?"checked":""}> Entregue</label>
+    </div></div>
+    <div class="field"><label>Total do pedido</label><input class="input" type="number" step="0.01" name="total" value="${Number(o.total || 0).toFixed(2)}" readonly></div>
     <div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar pedido</button></div>
   </form>`);
+  orderRows.forEach(row => addOrderItemRow(row.quantity,row.name));
+  updateOrderTotal();
 }
+window.addOrderItemRow = function(quantity=1,selectedName=""){
+  const container = document.getElementById('orderItemRows');
+  if(!container) return;
+  const products = Array.isArray(db.configProducts) ? db.configProducts : [];
+  const options = products.map(item => `<option value="${esc(item.name)}" ${item.name===selectedName?"selected":""}>${esc(item.name)}</option>`).join("");
+  const legacyOption = selectedName && !products.some(item => item.name===selectedName) ? `<option value="${esc(selectedName)}" selected>${esc(selectedName)}</option>` : "";
+  const row = document.createElement('div');
+  row.className = 'order-item-row';
+  row.innerHTML = `<input class="input order-item-quantity" type="number" min="1" step="1" value="${esc(quantity)}" aria-label="Qntd Itens" oninput="updateOrderTotal()">
+    <select class="select" aria-label="Item do pedido" onchange="updateOrderTotal()"><option value="">Selecione um produto</option>${options}${legacyOption}</select>`;
+  container.appendChild(row);
+  updateOrderTotal();
+};
+window.updateOrderTotal = function(){
+  const total = [...document.querySelectorAll('#orderItemRows .order-item-row')].reduce((sum,row)=>{
+    const quantity = Math.max(1,Number(row.querySelector('input').value) || 1);
+    const name = row.querySelector('select').value;
+    const product = db.configProducts.find(item=>item.name===name);
+    return sum + quantity * (product ? Number(product.price) || 0 : 0);
+  },0);
+  const totalInput = document.querySelector('#modalBody input[name="total"]');
+  if(totalInput) totalInput.value = total.toFixed(2);
+};
 function saveOrder(e,id){
   e.preventDefault();const f=new FormData(e.target);
-  const obj={id:id||uid(),date:f.get("date"),client:f.get("client"),items:f.get("items"),total:+f.get("total"),payment:f.get("payment"),status:f.get("status")};
+  const itemsRaw = [...document.querySelectorAll('#orderItemRows .order-item-row')].map(row=>{
+    const quantity = Math.max(1,parseInt(row.querySelector('input').value,10)||1);
+    const name = row.querySelector('select').value;
+    return name ? `${quantity}x ${name}` : '';
+  }).filter(Boolean).join(' | ');
+  const obj={id:id||uid(),date:f.get("date"),client:f.get("client"),items:itemsRaw,total:+f.get("total"),steps:{feito:f.has("feito"),pago:f.has("pago"),entregue:f.has("entregue")}};
   if(id) db.orders=db.orders.map(o=>o.id===id?obj:o); else db.orders.push(obj);
   closeModal();save();
 }
@@ -562,6 +652,65 @@ function openQuick(){
     <button class="btn" onclick="closeModal();openOrder()">🧁<br>Novo pedido</button>
     <button class="btn" onclick="closeModal();openCash()">💰<br>Novo caixa</button>
   </div>`);
+}
+function addConfigProduct(name,price,monthFilter="all"){
+  const value = String(name || "").trim();
+  if(!value) return;
+  db.configProducts = Array.isArray(db.configProducts) ? db.configProducts : [];
+  const month = monthFilter && monthFilter !== "all" ? monthFilter : today().slice(0,7);
+  if(!db.configProducts.some(item=>item.name===value && item.month===month)) db.configProducts.push({name:value,price:Number(price)||0,month});
+  save();
+  openSettings(monthFilter);
+}
+function saveConfigProductPrice(index,price){
+  const product = db.configProducts[index];
+  if(!product) return;
+  product.price = Math.max(0,Number(price)||0);
+  save();
+}
+function removeConfigProduct(index,monthFilter="all"){
+  db.configProducts = (db.configProducts || []).filter((item,itemIndex) => itemIndex !== index);
+  save();
+  openSettings(monthFilter);
+}
+function openSettings(monthFilter="all"){
+  const months = [...new Set([today().slice(0,7),...(db.configProducts || []).map(item=>item.month)])].filter(Boolean).sort().reverse();
+  const monthLabel = month => new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+  const visibleProducts = (db.configProducts || []).map((item,index)=>({...item,index})).filter(item=>monthFilter==="all" || item.month===monthFilter);
+  openModal("Configurações",`
+    <div class="config-layout">
+      <div class="config-panel">
+        <div class="field" style="margin-bottom:12px">
+          <label for="settingsMonth">Filtrar por mês</label>
+          <select class="select" id="settingsMonth" onchange="openSettings(this.value)">
+            <option value="all" ${monthFilter==="all"?"selected":""}>Todos os meses</option>
+            ${months.map(month=>`<option value="${month}" ${monthFilter===month?"selected":""}>${monthLabel(month)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="config-header">
+          <h3>Produtos Cadastrados</h3>
+        </div>
+        <form onsubmit="event.preventDefault(); addConfigProduct(this.name.value,this.price.value,document.getElementById('settingsMonth').value); this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <input class="input" name="name" placeholder="Ex.: Cone Doce de Leite" style="flex:1;min-width:180px">
+          <input class="input" name="price" type="number" min="0" step="0.01" placeholder="Preço R$" aria-label="Preço do produto" style="width:115px">
+          <button class="btn small" type="submit">+ Adicionar</button>
+        </form>
+        <div class="config-list">
+          ${visibleProducts.length ? visibleProducts.map(item => `
+            <div class="config-item">
+              <div>
+                <strong>${esc(item.name)}</strong>
+              </div>
+              <div class="config-actions">
+                <input class="input" type="number" min="0" step="0.01" value="${Number(item.price)||0}" aria-label="Preço de ${esc(item.name)}" onchange="saveConfigProductPrice(${item.index},this.value)" style="width:105px;padding:6px 8px">
+                <button class="btn small" onclick="removeConfigProduct(${item.index},'${monthFilter}');">Excluir</button>
+              </div>
+            </div>
+          `).join("") : `<div class="empty">Nenhum produto neste mês.</div>`}
+        </div>
+      </div>
+    </div>
+  `);
 }
 function exportData(){
   const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});
