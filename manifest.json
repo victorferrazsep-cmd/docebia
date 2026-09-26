@@ -1,0 +1,21 @@
+{
+  "name": "Doce Gestão",
+  "short_name": "Doce Gestão",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fff7f8",
+  "theme_color": "#e56b91",
+  "description": "Aplicativo de gestão de estoque, pedidos e fluxo de caixa para uma doceria.",
+  "icons": [
+    {
+      "src": "assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
