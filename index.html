@@ -210,6 +210,17 @@ tbody tr:hover{background:#f8d4df}
 .order-stage-selector label{display:flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #eed6dd;border-radius:8px;background:#fff9fb;font-size:11px;font-weight:800;color:#744632}
 .order-stage-selector input{margin:0;accent-color:var(--pink-dark)}
 .order-stage-badges{display:flex;justify-content:flex-end;gap:5px;flex-wrap:wrap;margin:0}
+#estoque .table-wrap{overflow-x:hidden}
+#estoque table{width:100%;min-width:0;table-layout:fixed}
+#estoque th,#estoque td{text-align:center;padding:6px 4px;font-size:10px;white-space:normal;overflow-wrap:anywhere}
+#estoque th:nth-child(1){width:20%}
+#estoque th:nth-child(2){width:30%}
+#estoque th:nth-child(3){width:10%}
+#estoque th:nth-child(4){width:8%}
+#estoque th:nth-child(5){width:18%}
+#estoque th:nth-child(6){width:14%}
+#estoque .stock-actions{display:flex;justify-content:center;gap:1px}
+#estoque .order-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;min-width:16px;padding:1px 0;margin:0;font-size:10px}
 
 .two-col{display:grid;grid-template-columns:1.4fr .8fr;gap:13px}
 .legend{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px}
@@ -304,7 +315,7 @@ tbody tr:hover{background:#f8d4df}
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Produto</th><th>Especificações</th><th>Estoque</th><th>Unid.</th><th>Custo</th><th>Mín.</th><th>Status</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Produto</th><th>Especificações</th><th>Estoque</th><th>Unid.</th><th>Custo</th><th>Ações</th></tr></thead>
             <tbody id="stockTable"></tbody>
           </table>
         </div>
@@ -474,15 +485,13 @@ function renderStock(){
   document.getElementById("stockValue").textContent=money(db.products.reduce((s,p)=>s+p.stock*p.cost,0));
   document.getElementById("categoryCount").textContent=new Set(db.products.map(p=>p.cat)).size;
   document.getElementById("stockTable").innerHTML=rows.map(p=>{
-    const [cls,label]=statusProduct(p);
     return `<tr>
       <td><b>${esc(p.name)}</b></td><td>${esc(p.spec)}</td>
-      <td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td><td>${p.min}</td>
-      <td><span class="badge ${cls}">● ${label}</span></td>
-      <td><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button>
-      <button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></td>
+      <td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td>
+      <td><div class="stock-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button>
+      <button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></div></td>
     </tr>`
-  }).join("") || `<tr><td colspan="8" class="empty">Nenhum produto encontrado.</td></tr>`;
+  }).join("") || `<tr><td colspan="6" class="empty">Nenhum produto encontrado.</td></tr>`;
 }
 function renderOrders(){
   const q=(document.getElementById("orderSearch")?.value||"").toLowerCase();
@@ -541,7 +550,28 @@ function openModal(title,body){
   document.getElementById("modalBody").innerHTML=body;
   document.getElementById("modal").classList.add("show");
 }
-function closeModal(){document.getElementById("modal").classList.remove("show")}
+let confirmationAction = null;
+function closeModal(){
+  confirmationAction = null;
+  document.getElementById("modal").classList.remove("show");
+}
+function askConfirmation(title,message,buttonText,action){
+  confirmationAction = action;
+  openModal(title,`
+    <div style="padding:18px">
+      <p style="margin:0;color:var(--text);line-height:1.5">${message}</p>
+      <div class="modal-footer" style="padding:18px 0 0">
+        <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
+        <button type="button" class="btn" onclick="runConfirmation()">🗑 ${esc(buttonText)}</button>
+      </div>
+    </div>
+  `);
+}
+function runConfirmation(){
+  const action = confirmationAction;
+  closeModal();
+  if(action) action();
+}
 function openProduct(id){
   const p=db.products.find(x=>x.id===id)||{id:"",name:"",cat:"",spec:"",stock:0,unit:"unid",cost:0,price:0,min:1};
   openModal(id?"Editar produto":"Novo produto",`
@@ -566,20 +596,10 @@ function saveProduct(e,id){
 function deleteProduct(id){
   const product=db.products.find(item=>item.id===id);
   if(!product) return;
-  openModal("Excluir produto",`
-    <div style="padding:18px">
-      <p style="margin:0;color:var(--text);line-height:1.5">Tem certeza de que deseja excluir <b>${esc(product.name)}</b>?</p>
-      <div class="modal-footer" style="padding:18px 0 0">
-        <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
-        <button type="button" class="btn" onclick="confirmDeleteProduct('${id}')">🗑 Excluir produto</button>
-      </div>
-    </div>
-  `);
-}
-function confirmDeleteProduct(id){
-  db.products=db.products.filter(product=>product.id!==id);
-  closeModal();
-  save();
+  askConfirmation("Excluir produto",`Tem certeza de que deseja excluir <b>${esc(product.name)}</b>?`,"Excluir produto",()=>{
+    db.products=db.products.filter(item=>item.id!==id);
+    save();
+  });
 }
 function openOrder(id){
   const o=db.orders.find(x=>x.id===id)||{id:"",date:today(),client:"",items:"",total:0,steps:{feito:true,pago:false,entregue:false}};
@@ -641,7 +661,14 @@ function saveOrder(e,id){
   if(id) db.orders=db.orders.map(o=>o.id===id?obj:o); else db.orders.push(obj);
   closeModal();save();
 }
-function deleteOrder(id){if(confirm("Excluir este pedido?")){db.orders=db.orders.filter(o=>o.id!==id);save()}}
+function deleteOrder(id){
+  const order=db.orders.find(item=>item.id===id);
+  if(!order) return;
+  askConfirmation("Excluir pedido",`Tem certeza de que deseja excluir o pedido <b>#${esc(id.slice(-5).toUpperCase())}</b>?`,"Excluir pedido",()=>{
+    db.orders=db.orders.filter(item=>item.id!==id);
+    save();
+  });
+}
 function openCash(){
   openModal("Novo lançamento",`
   <form class="form" onsubmit="saveCash(event)">
@@ -659,7 +686,14 @@ function saveCash(e){
   db.cash.push({id:uid(),date:f.get("date"),type:f.get("type"),desc:f.get("desc"),cat:f.get("cat"),method:f.get("method"),value:+f.get("value")});
   closeModal();save();
 }
-function deleteCash(id){if(confirm("Excluir este lançamento?")){db.cash=db.cash.filter(c=>c.id!==id);save()}}
+function deleteCash(id){
+  const entry=db.cash.find(item=>item.id===id);
+  if(!entry) return;
+  askConfirmation("Excluir lançamento",`Tem certeza de que deseja excluir <b>${esc(entry.desc)}</b>?`,"Excluir lançamento",()=>{
+    db.cash=db.cash.filter(item=>item.id!==id);
+    save();
+  });
+}
 function openQuick(){
   openModal("O que deseja cadastrar?",`
   <div style="padding:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
