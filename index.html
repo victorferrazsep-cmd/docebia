@@ -564,7 +564,22 @@ function saveProduct(e,id){
   closeModal();save();
 }
 function deleteProduct(id){
-  if(confirm("Excluir este produto?")){db.products=db.products.filter(p=>p.id!==id);save()}
+  const product=db.products.find(item=>item.id===id);
+  if(!product) return;
+  openModal("Excluir produto",`
+    <div style="padding:18px">
+      <p style="margin:0;color:var(--text);line-height:1.5">Tem certeza de que deseja excluir <b>${esc(product.name)}</b>?</p>
+      <div class="modal-footer" style="padding:18px 0 0">
+        <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
+        <button type="button" class="btn" onclick="confirmDeleteProduct('${id}')">🗑 Excluir produto</button>
+      </div>
+    </div>
+  `);
+}
+function confirmDeleteProduct(id){
+  db.products=db.products.filter(product=>product.id!==id);
+  closeModal();
+  save();
 }
 function openOrder(id){
   const o=db.orders.find(x=>x.id===id)||{id:"",date:today(),client:"",items:"",total:0,steps:{feito:true,pago:false,entregue:false}};
