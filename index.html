@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="manifest" href="manifest.json">
-<title>Doce Gestão — Estoque, Pedidos e Caixa</title>
+<title>doce🩷bia — Feito com amor</title>
 <style>
 :root{
   --pink:#e56b91;
@@ -47,10 +47,9 @@ button{cursor:pointer}
 }
 .brand{display:flex;align-items:center;gap:12px}
 .logo{
-  width:55px;height:55px;border-radius:17px;
-  display:grid;place-items:center;font-size:29px;
-  background:linear-gradient(145deg,#ffe9ef,#e96f96);
-  box-shadow:var(--shadow);border:1px solid #f4c1d0
+  width:55px;height:55px;border-radius:0;
+  display:block;object-fit:contain;padding:0;
+  background:transparent;box-shadow:none;border:0
 }
 .brand h1{font-size:21px;margin:0;color:var(--brown)}
 .brand small{color:var(--muted);font-size:12px}
@@ -215,10 +214,10 @@ tbody tr:hover{background:#f8d4df}
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div class="logo">🧁</div>
+      <img class="logo" src="logo.png" alt="Logo Doce Bia">
       <div>
-        <h1>Doce Gestão</h1>
-        <small>Estoque • Pedidos • Fluxo de Caixa</small>
+        <h1>doce🩷bia</h1>
+        <small>Gestão & Fluxo de Caixa</small>
       </div>
     </div>
     <div class="month">MÊS: <span id="monthName">SETEMBRO</span></div>

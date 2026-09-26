@@ -1,11 +1,11 @@
 {
-  "name": "Doce Bia",
-  "short_name": "Doce Bia",
+  "name": "Doce❤️Bia",
+  "short_name": "Doce❤️Bia",
   "start_url": "index.html",
   "display": "fullscreen",
   "background_color": "#fff7f8",
   "theme_color": "#e56b91",
-  "description": "Fluxo de caixa, controle de estoque e vendas da DoceBia.",
+  "description": "Fluxo de caixa, controle de estoque e vendas da Doce❤️Bia.",
   "icons": [
     {
       "src": "logo.png",
