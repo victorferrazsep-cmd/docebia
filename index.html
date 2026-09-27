@@ -214,8 +214,8 @@ tbody tr:hover{background:#f8d4df}
 .order-stage-selector label{display:flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #eed6dd;border-radius:8px;background:#fff9fb;font-size:11px;font-weight:800;color:#744632}
 .order-stage-selector input{margin:0;accent-color:var(--pink-dark)}
 .order-stage-badges{display:flex;justify-content:flex-end;gap:5px;flex-wrap:wrap;margin:0}
-.buyer-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:12px;padding:4px 16px 14px;background:#fff}
-.buyer-rank{display:flex;width:100%;height:268px;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-width:0;max-width:170px;justify-self:center;align-self:stretch}
+.buyer-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:12px;padding:10px 16px 14px;background:#fff}
+.buyer-rank{display:flex;width:100%;height:252px;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-width:0;max-width:170px;justify-self:center;align-self:stretch}
 .buyer-rank.place-1{grid-column:2;grid-row:1}
 .buyer-rank.place-2{grid-column:1;grid-row:1}
 .buyer-rank.place-3{grid-column:3;grid-row:1}
@@ -225,21 +225,21 @@ tbody tr:hover{background:#f8d4df}
 .buyer-rank.place-2 .buyer-avatar{margin-top:24px}
 .buyer-rank.place-3 .buyer-avatar{margin-top:32px}
 .buyer-name{max-width:100%;padding:2px 4px;color:var(--brown);font-size:13px;font-weight:800;text-align:center;overflow-wrap:anywhere}
-.buyer-sales{display:flex;width:100%;min-height:88px;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px 5px;border:1px solid #d4577f;border-radius:8px;background:#e66b91;color:#fff;text-align:center}
+.buyer-sales{display:flex;width:100%;min-height:72px;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px 5px;border:1px solid #d4577f;border-radius:8px;background:#e66b91;color:#fff;text-align:center}
 .buyer-rank .buyer-sales{margin-top:auto}
-.buyer-rank.place-1 .buyer-sales{min-height:108px;border-color:#b83c68;background:#c84875}
-.buyer-rank.place-3 .buyer-sales{min-height:80px;border-color:#c84470;background:#d95782}
+.buyer-rank.place-1 .buyer-sales{min-height:92px;border-color:#b83c68;background:#c84875}
+.buyer-rank.place-3 .buyer-sales{min-height:64px;border-color:#c84470;background:#d95782}
 .buyer-sales strong{max-width:100%;font-size:22px;font-weight:900;color:#fff;overflow-wrap:anywhere}
 .buyer-sales small{font-size:11px;color:rgba(255,255,255,.92)}
 .buyer-empty{width:100%}
-.flavor-podium{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:12px;padding:4px 16px 14px;background:#fff}
+.flavor-podium{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:12px;padding:10px 16px 14px;background:#fff}
 .flavor-rank{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}
 .flavor-rank .buyer-avatar{width:100px;height:100px}
 .flavor-medal{font-size:24px;line-height:1}
-.flavor-rank .buyer-sales{min-height:88px}
-.flavor-rank.place-1 .buyer-sales{min-height:108px;border-color:#b83c68;background:#c84875}
-.flavor-rank.place-2 .buyer-sales{min-height:98px}
-.flavor-rank.place-3 .buyer-sales{min-height:92px}
+.flavor-rank .buyer-sales{min-height:72px}
+.flavor-rank.place-1 .buyer-sales{min-height:92px;border-color:#b83c68;background:#c84875}
+.flavor-rank.place-2 .buyer-sales{min-height:82px}
+.flavor-rank.place-3 .buyer-sales{min-height:76px}
 #estoque .table-wrap{overflow-x:hidden}
 #estoque .table-wrap{overflow-x:hidden}
 #estoque table{width:100%;min-width:0;table-layout:fixed}
@@ -287,16 +287,20 @@ tbody tr:hover{background:#f8d4df}
 @media(max-width:500px){
   .dashboard-grid,.kpis{grid-template-columns:1fr}
   .stock-kpis{grid-template-columns:1fr}
-  .buyer-podium{gap:6px;padding:2px 8px 12px}
-  .flavor-podium{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:2px 8px 12px}
-  .buyer-rank{height:214px}
+  .buyer-podium{gap:6px;padding:10px 8px 12px}
+  .flavor-podium{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:10px 8px 12px}
+  .buyer-rank{height:206px}
   .buyer-avatar{width:72px;height:72px}
   .buyer-rank.place-2 .buyer-avatar{margin-top:16px}
   .buyer-rank.place-3 .buyer-avatar{margin-top:22px}
   .buyer-name{padding:2px;font-size:11px}
-  .buyer-sales{min-height:72px;padding:7px 3px}
-  .buyer-rank.place-1 .buyer-sales{min-height:88px}
-  .buyer-rank.place-3 .buyer-sales{min-height:66px}
+  .buyer-sales{min-height:60px;padding:7px 3px}
+  .buyer-rank.place-1 .buyer-sales{min-height:72px}
+  .buyer-rank.place-3 .buyer-sales{min-height:58px}
+  .flavor-rank .buyer-sales{min-height:64px}
+  .flavor-rank.place-1 .buyer-sales{min-height:76px}
+  .flavor-rank.place-2 .buyer-sales{min-height:70px}
+  .flavor-rank.place-3 .buyer-sales{min-height:66px}
   .buyer-medal{font-size:16px}
   .buyer-sales strong{font-size:18px}
   .buyer-sales small{font-size:10px}
