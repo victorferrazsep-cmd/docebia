@@ -214,8 +214,8 @@ tbody tr:hover{background:#f8d4df}
 .order-stage-selector label{display:flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #eed6dd;border-radius:8px;background:#fff9fb;font-size:11px;font-weight:800;color:#744632}
 .order-stage-selector input{margin:0;accent-color:var(--pink-dark)}
 .order-stage-badges{display:flex;justify-content:flex-end;gap:5px;flex-wrap:wrap;margin:0}
-.buyer-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:12px;padding:20px 16px 14px;background:#fff}
-.buyer-rank{display:flex;width:100%;height:276px;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-width:0;max-width:170px;justify-self:center;align-self:stretch}
+.buyer-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:12px;padding:4px 16px 14px;background:#fff}
+.buyer-rank{display:flex;width:100%;height:268px;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-width:0;max-width:170px;justify-self:center;align-self:stretch}
 .buyer-rank.place-1{grid-column:2;grid-row:1}
 .buyer-rank.place-2{grid-column:1;grid-row:1}
 .buyer-rank.place-3{grid-column:3;grid-row:1}
@@ -232,8 +232,8 @@ tbody tr:hover{background:#f8d4df}
 .buyer-sales strong{max-width:100%;font-size:22px;font-weight:900;color:#fff;overflow-wrap:anywhere}
 .buyer-sales small{font-size:11px;color:rgba(255,255,255,.92)}
 .buyer-empty{width:100%}
-.flavor-podium{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:12px;padding:20px 16px 14px;background:#fff}
-.flavor-rank{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px}
+.flavor-podium{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:12px;padding:4px 16px 14px;background:#fff}
+.flavor-rank{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}
 .flavor-rank .buyer-avatar{width:100px;height:100px}
 .flavor-medal{font-size:24px;line-height:1}
 .flavor-rank .buyer-sales{min-height:88px}
@@ -261,6 +261,15 @@ tbody tr:hover{background:#f8d4df}
 
 .two-col{display:grid;grid-template-columns:1.4fr .8fr;gap:13px}
 .legend{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px}
+.dre-statement{padding:18px}
+.dre-period{margin:0 12px 12px;color:var(--muted);font-size:11px}
+.dre-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 12px;border-bottom:1px solid var(--line)}
+.dre-row span{font-size:12px}
+.dre-row strong{font-size:15px;white-space:nowrap}
+.dre-result{margin-top:8px;border-top:2px solid var(--brown);border-bottom:0}
+.dre-result span{font-weight:900}
+.dre-result strong{font-size:20px}
+.dre-note{margin:10px 12px 0;color:var(--muted);font-size:10px;line-height:1.5}
 .cash-positive{color:#4c8956;font-weight:900}.cash-negative{color:#b64d58;font-weight:900}
 
 @media(max-width:1150px){
@@ -278,9 +287,9 @@ tbody tr:hover{background:#f8d4df}
 @media(max-width:500px){
   .dashboard-grid,.kpis{grid-template-columns:1fr}
   .stock-kpis{grid-template-columns:1fr}
-  .buyer-podium{gap:6px;padding:16px 8px 12px}
-  .flavor-podium{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:16px 8px 12px}
-  .buyer-rank{height:222px}
+  .buyer-podium{gap:6px;padding:2px 8px 12px}
+  .flavor-podium{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:2px 8px 12px}
+  .buyer-rank{height:214px}
   .buyer-avatar{width:72px;height:72px}
   .buyer-rank.place-2 .buyer-avatar{margin-top:16px}
   .buyer-rank.place-3 .buyer-avatar{margin-top:22px}
@@ -408,22 +417,14 @@ tbody tr:hover{background:#f8d4df}
           </div>
         </div>
         <div class="panel">
-          <div class="panel-title">RESUMO DO CAIXA</div>
-          <div style="padding:18px">
-            <div class="legend">
-              <span class="badge ok">● Entrada</span>
-              <span class="badge danger">● Saída</span>
-            </div>
-            <div style="padding:12px;border-bottom:1px solid var(--line)">
-              <small>Entradas</small><h2 class="cash-positive" id="cashIn2">R$ 0,00</h2>
-            </div>
-            <div style="padding:12px;border-bottom:1px solid var(--line)">
-              <small>Saídas</small><h2 class="cash-negative" id="cashOut2">R$ 0,00</h2>
-            </div>
-            <div style="padding:12px">
-              <small>Saldo</small><h2 id="cashBalance2">R$ 0,00</h2>
-            </div>
-            <button class="btn secondary" style="width:100%" onclick="exportData()">☁️ Exportar backup</button>
+          <div class="panel-title">DRE SIMPLIFICADA</div>
+          <div class="dre-statement">
+            <p class="dre-period">Valores acumulados · regime de caixa</p>
+            <div class="dre-row"><span>Receitas (entradas)</span><strong class="cash-positive" id="cashIn2">R$ 0,00</strong></div>
+            <div class="dre-row"><span>(−) Custos e despesas (saídas)</span><strong class="cash-negative" id="cashOut2">R$ 0,00</strong></div>
+            <div class="dre-row dre-result"><span>Resultado líquido</span><strong id="cashBalance2">R$ 0,00</strong></div>
+            <p class="dre-note">Demonstrativo simplificado calculado a partir dos lançamentos de entrada e saída do caixa.</p>
+            <button class="btn secondary" style="width:100%;margin-top:16px" onclick="exportData()">☁️ Exportar backup</button>
           </div>
         </div>
       </div>
@@ -630,7 +631,11 @@ function renderCash(){
   const balance=input-output;
   document.getElementById("cashIn").textContent=money(input);document.getElementById("cashIn2").textContent=money(input);
   document.getElementById("cashOut").textContent=money(output);document.getElementById("cashOut2").textContent=money(output);
-  document.getElementById("cashBalance").textContent=money(balance);document.getElementById("cashBalance2").textContent=money(balance);
+  document.getElementById("cashBalance").textContent=money(balance);
+  const cashResult=document.getElementById("cashBalance2");
+  cashResult.textContent=money(balance);
+  cashResult.classList.toggle("cash-positive",balance>=0);
+  cashResult.classList.toggle("cash-negative",balance<0);
   document.getElementById("cashCount").textContent=db.cash.length;
   document.getElementById("cashTable").innerHTML=rows.map(c=>`
     <tr><td>${formatDate(c.date)}</td><td><span class="badge ${c.type==="Entrada"?"ok":"danger"}">● ${c.type}</span></td>
