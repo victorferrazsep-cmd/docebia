@@ -101,12 +101,15 @@ button{cursor:pointer}
 .card:nth-child(4){background:linear-gradient(145deg,#fff9dc,#ffecae)}
 .card:nth-child(5){background:linear-gradient(145deg,#fff8d9,#e4e9ad)}
 .card:nth-child(6){background:linear-gradient(145deg,#fce7ee,#efb6ca)}
+.card.balance-positive{background:linear-gradient(145deg,#f4faf1,#e5f1e2)}
+.card.balance-negative{background:linear-gradient(145deg,#fff5f5,#f8e2e4)}
 .card .ico{grid-column:1;grid-row:1 / span 3;font-size:29px}
 .card-content{grid-column:2;min-width:0}
 .card label{display:block;font-size:11px;text-transform:uppercase;font-weight:700;color:#744632}
 .card strong{display:block;font-size:22px;margin-top:3px;color:#6d2f1d}
 .card small{display:block;font-size:10px;color:#7c665c}
 .card .subline{margin-top:3px}
+.dashboard-grid .card-content>.order-metric-summary{margin-top:0}
 
 .panel{
   background:rgba(255,255,255,.86);border:1px solid var(--line);
@@ -156,11 +159,24 @@ tbody tr:hover{background:#f8d4df}
 .kpis{
   display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px
 }
+.order-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
 .stock-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+.order-status-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px;text-align:center}
+.order-status-summary strong{display:block;color:var(--brown);font-size:18px}
+.order-status-summary small{display:block;color:var(--muted);font-size:10px}
+.order-metric-summary{display:flex;align-items:center;justify-content:flex-start;gap:18px;margin-top:8px;text-align:left}
+.order-metric-summary>div{display:flex;min-width:0;flex-direction:column;align-items:flex-start;justify-content:center}
+.order-metric-summary strong{display:block;color:var(--brown);font-size:22px;font-weight:900}
+#pedidos .order-metric-summary strong{font-size:18px}
+#pedidos .order-metric-summary{text-align:center}
+#pedidos .order-metric-summary>div{align-items:center}
+.order-metric-summary small{display:block;color:var(--muted);font-size:10px;font-weight:400}
+.order-cones-summary{justify-self:start;outline:1px solid var(--line);outline-offset:2px;border-radius:6px}
 .kpi{
   background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;
   box-shadow:var(--shadow)
 }
+.kpi.has-overdue{background:linear-gradient(145deg,#fffafa,#fbeaec)}
 .kpi .title{font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:800}
 .kpi .value{font-size:24px;font-weight:900;color:var(--brown);margin-top:5px}
 .kpi .sub{font-size:11px;color:var(--muted)}
@@ -269,11 +285,13 @@ tbody tr:hover{background:#f8d4df}
 .dre-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 12px;border-bottom:1px solid var(--line)}
 .dre-row span{font-size:12px}
 .dre-row strong{font-size:15px;white-space:nowrap}
+.dre-subtotal span,.dre-subtotal strong{font-weight:800}
 .dre-result{margin-top:8px;border-top:2px solid var(--brown);border-bottom:0}
 .dre-result span{font-weight:900}
 .dre-result strong{font-size:20px}
 .dre-note{margin:10px 12px 0;color:var(--muted);font-size:10px;line-height:1.5}
 .cash-positive{color:#4c8956;font-weight:900}.cash-negative{color:#b64d58;font-weight:900}
+.cash-actions{display:flex;justify-content:flex-end;margin-bottom:12px}
 
 @media(max-width:1150px){
   .dashboard-grid{grid-template-columns:repeat(3,1fr)}
@@ -282,6 +300,7 @@ tbody tr:hover{background:#f8d4df}
   .app{padding:12px}
   .topbar{align-items:flex-start}.month{display:none}
   .dashboard-grid,.kpis{grid-template-columns:repeat(2,1fr)}
+  .order-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stock-kpis{grid-template-columns:repeat(2,1fr)}
   .two-col{grid-template-columns:1fr}
   .table-wrap{overflow-x:auto}
@@ -289,6 +308,7 @@ tbody tr:hover{background:#f8d4df}
 }
 @media(max-width:500px){
   .dashboard-grid,.kpis{grid-template-columns:1fr}
+  .order-kpis{grid-template-columns:1fr}
   .stock-kpis{grid-template-columns:1fr}
   .buyer-podium{gap:6px;padding:10px 8px 12px}
   .flavor-podium{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:10px 8px 12px}
@@ -342,9 +362,9 @@ tbody tr:hover{background:#f8d4df}
     <section id="dashboard" class="section active">
       <div class="dashboard-grid">
         <div class="card"><span class="ico">📦</span><div class="card-content"><label>Itens em estoque</label><strong id="dashItems">0</strong><small>Produtos Ativos</small></div></div>
-        <div class="card"><span class="ico">🧁</span><div class="card-content"><label>Pedidos no mês</label><strong id="dashOrders">0</strong><small>Pedidos Registrados</small></div></div>
+        <div class="card"><span class="ico">🧁</span><div class="card-content"><label>Pedidos do mês</label><div class="order-metric-summary"><div><strong id="dashOrders">0</strong><small id="dashOrdersLabel">Pedidos</small></div><div><strong id="dashCones">0</strong><small id="dashConesLabel">Cones</small></div></div></div></div>
         <div class="card"><span class="ico">📈</span><div class="card-content"><label>Total de vendas</label><strong id="dashSales">R$ 0,00</strong><small class="subline" id="dashSalesReceived">Pagamentos Recebidos R$ 0,00</small><small class="subline" id="dashSalesPending">Pagamentos Pendentes R$ 0,00</small></div></div>
-        <div class="card"><span class="ico">💗</span><div class="card-content"><label>Saldo do caixa</label><strong id="dashBalance">R$ 0,00</strong><small>Entradas & Saídas</small></div></div>
+        <div class="card" id="dashBalanceCard"><span class="ico">💗</span><div class="card-content"><label>Saldo do caixa</label><strong id="dashBalance">R$ 0,00</strong><small class="subline" id="dashBalanceExpenses">Saídas R$ 0,00</small><small class="subline" id="dashBalanceReceived">Entradas R$ 0,00</small></div></div>
       </div>
 
       <div class="panel">
@@ -359,7 +379,7 @@ tbody tr:hover{background:#f8d4df}
 
     <section id="estoque" class="section">
       <div class="kpis stock-kpis">
-        <div class="kpi"><div class="title">Unidades em estoque</div><div class="value" id="stockCount">0</div><div class="sub">soma dos produtos ativos</div></div>
+        <div class="kpi"><div class="title">Produtos ativos</div><div class="value" id="stockCount">0</div><div class="sub">produtos no estoque</div></div>
         <div class="kpi"><div class="title">Valor do estoque</div><div class="value" id="stockValue">R$ 0,00</div><div class="sub">itens em estoque</div></div>
       </div>
       <div class="panel">
@@ -381,18 +401,18 @@ tbody tr:hover{background:#f8d4df}
     </section>
 
     <section id="pedidos" class="section">
-      <div class="kpis">
-        <div class="kpi"><div class="title">Pedidos</div><div class="value" id="orderCount">0</div><div class="sub">no mês</div></div>
-        <div class="kpi"><div class="title">Recebido</div><div class="value" id="orderReceived">R$ 0,00</div><div class="sub">pagamentos confirmados</div></div>
-        <div class="kpi"><div class="title">A receber</div><div class="value" id="orderToReceive">R$ 0,00</div><div class="sub">pagamentos pendentes</div></div>
-        <div class="kpi"><div class="title">Valor total</div><div class="value" id="orderTotal">R$ 0,00</div><div class="sub">soma dos pedidos</div></div>
+      <div class="kpis order-kpis">
+        <div class="kpi"><div class="title">Pedidos</div><div class="order-metric-summary"><div><strong id="orderCount">0</strong><small id="orderCountLabel">Pedidos</small></div><div><strong id="orderConeCount">0</strong><small id="orderConeLabel">Cones</small></div></div></div>
+        <div class="kpi"><div class="title">Resumo dos pedidos</div><div class="order-status-summary"><div><strong id="orderDoneCount">0</strong><small>Feitos</small></div><div><strong id="orderPaidCount">0</strong><small>Pagos</small></div><div><strong id="orderDeliveredCount">0</strong><small>Entregues</small></div><div class="order-cones-summary"><strong id="orderMadeConeCount">0</strong><small>Cones feitos</small></div></div></div>
+        <div class="kpi" id="overduePaymentsCard"><div class="title">Pagamentos em atraso</div><div class="order-metric-summary"><div><strong id="orderOverdueCount">0</strong><small>Pedidos</small></div><div><strong id="orderOverdueValue">R$ 0,00</strong><small>Valor</small></div></div></div>
+        <div class="card"><span class="ico">📈</span><div class="card-content"><label>Total de vendas</label><strong id="orderSales">R$ 0,00</strong><small class="subline" id="orderSalesReceived">Pagamentos Recebidos R$ 0,00</small><small class="subline" id="orderSalesPending">Pagamentos Pendentes R$ 0,00</small></div></div>
       </div>
       <div class="panel">
         <div class="panel-title">PEDIDOS DA DOCERIA</div>
         <div class="toolbar">
           <div class="filters">
             <input class="input" id="orderSearch" placeholder="🔎 Cliente ou pedido..." oninput="renderOrders()">
-            <select class="select" id="orderFilter" onchange="renderOrders()"><option value="">Todos</option><option value="feito">Feito</option><option value="pago">Pago</option><option value="entregue">Entregue</option></select>
+            <select class="select" id="orderFilter" onchange="renderOrders()"><option value="">Todos</option><option value="feito">Feito</option><option value="nao_feito">Não feito</option><option value="pago">Pago</option><option value="nao_pago">Não pago</option><option value="entregue">Entregue</option><option value="nao_entregue">Não entregue</option></select>
           </div>
           <button class="btn" onclick="openOrder()">+ Novo pedido</button>
         </div>
@@ -407,34 +427,24 @@ tbody tr:hover{background:#f8d4df}
         <div class="kpi"><div class="title">Saldo</div><div class="value" id="cashBalance">R$ 0,00</div><div class="sub">resultado acumulado</div></div>
         <div class="kpi"><div class="title">Lançamentos</div><div class="value" id="cashCount">0</div><div class="sub">movimentações</div></div>
       </div>
-      <div class="two-col">
-        <div class="panel">
-          <div class="panel-title">MOVIMENTAÇÕES</div>
-          <div class="toolbar">
-            <div class="filters">
-              <input class="input" id="cashSearch" placeholder="🔎 Buscar..." oninput="renderCash()">
-              <select class="select" id="cashFilter" onchange="renderCash()"><option value="">Todos</option><option value="Entrada">Entradas</option><option value="Saída">Saídas</option></select>
-            </div>
-            <button class="btn" onclick="openCash()">+ Lançamento</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Forma</th><th>Valor</th><th>Ações</th></tr></thead>
-              <tbody id="cashTable"></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="panel">
+      <div class="cash-actions"><button class="btn" onclick="openCash()">+ Lançamento</button></div>
+      <div class="panel">
           <div class="panel-title">DRE SIMPLIFICADA</div>
           <div class="dre-statement">
             <p class="dre-period">Valores acumulados · regime de caixa</p>
-            <div class="dre-row"><span>Receitas (entradas)</span><strong class="cash-positive" id="cashIn2">R$ 0,00</strong></div>
-            <div class="dre-row"><span>(−) Custos e despesas (saídas)</span><strong class="cash-negative" id="cashOut2">R$ 0,00</strong></div>
+            <div class="dre-row"><span>Entradas do caixa</span><strong class="cash-positive" id="dreCashIncome">R$ 0,00</strong></div>
+            <div class="dre-row"><span>Entradas de pedidos pagos</span><strong class="cash-positive" id="dreOrderIncome">R$ 0,00</strong></div>
+            <div class="dre-row dre-subtotal"><span>Total de entradas</span><strong class="cash-positive" id="cashIn2">R$ 0,00</strong></div>
+            <div class="dre-row"><span>Saídas do caixa</span><strong class="cash-negative" id="dreCashExpenses">R$ 0,00</strong></div>
+            <div class="dre-row"><span>Despesas do estoque</span><strong class="cash-negative" id="dreStockExpenses">R$ 0,00</strong></div>
+            <div class="dre-row dre-subtotal"><span>Total de despesas</span><strong class="cash-negative" id="cashOut2">R$ 0,00</strong></div>
+            <div class="dre-row"><span>Resultado antes do retorno</span><strong id="dreBeforeReturn">R$ 0,00</strong></div>
+            <div class="dre-row"><span id="dreReturnLabel">Retorno ao caixa (40%)</span><strong class="cash-negative" id="dreCashReturn">R$ 0,00</strong></div>
             <div class="dre-row dre-result"><span>Resultado líquido</span><strong id="cashBalance2">R$ 0,00</strong></div>
-            <p class="dre-note">Demonstrativo simplificado calculado a partir dos lançamentos de entrada e saída do caixa.</p>
-            <button class="btn secondary" style="width:100%;margin-top:16px" onclick="exportData()">☁️ Exportar backup</button>
+            <p class="dre-note">Entradas incluem lançamentos do caixa e pedidos pagos; despesas incluem saídas do caixa e custos cadastrados no estoque.</p>
+            <button class="btn" style="width:100%;margin-top:16px" onclick="exportDrePdf()">📄 Exportar DRE em PDF</button>
+            <button class="btn secondary" style="width:100%;margin-top:8px" onclick="exportData()">☁️ Exportar backup</button>
           </div>
-        </div>
       </div>
     </section>
   </main>
@@ -448,6 +458,7 @@ tbody tr:hover{background:#f8d4df}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script>
 /* ============================================================*/
 
@@ -455,6 +466,7 @@ const SUPABASE_URL = "https://jsxurjbragxnutqvadyl.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_0m5jb1WEkjJcMk-WxfRd-w_M0mRmo8T";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const KEY="doceGestao_v1";
+const CASH_RETURN_KEY=KEY+"_cash_return_percent";
 const brl = v => Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const today = () => new Date().toISOString().slice(0,10);
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -465,6 +477,7 @@ let loading = true;
 let confirmationAction = null;
 
 function money(v){return brl(v)}
+function getCashReturnPercent(){const stored=localStorage.getItem(CASH_RETURN_KEY);if(stored===null)return 40;const percent=Number(stored);return Number.isFinite(percent)&&percent>=0&&percent<=100?percent:40}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function formatDate(d){return d?new Date(d+"T12:00:00").toLocaleDateString("pt-BR"):""}
 function monthLabel(){document.getElementById("monthName").textContent=new Date().toLocaleDateString("pt-BR",{month:"long"}).toUpperCase()}
@@ -536,13 +549,24 @@ function renderDashboard(){
   const received=db.orders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0);
   const sales=db.orders.reduce((s,o)=>s+o.total,0);
   const pending=db.orders.filter(o=>!o.steps.pago).reduce((s,o)=>s+(Number(o.total)||0),0);
-  const balance=db.cash.reduce((s,c)=>s+(c.type==="Entrada"?c.value:-c.value),0);
+  const currentMonth=today().slice(0,7);
+  const stockExpenses=db.products.filter(p=>String(p.purchaseDate||"").slice(0,7)===currentMonth).reduce((sum,p)=>sum+(Number(p.cost)||0),0);
+  const balance=received-stockExpenses;
+  const coneCount=countOrderCones(db.orders);
   document.getElementById("dashItems").textContent=db.products.filter(p=>!p.finished).length;
   document.getElementById("dashOrders").textContent=db.orders.length;
+  document.getElementById("dashOrdersLabel").textContent=db.orders.length===1?"Pedido":"Pedidos";
+  document.getElementById("dashCones").textContent=coneCount;
+  document.getElementById("dashConesLabel").textContent=coneCount===1?"Cone":"Cones";
   document.getElementById("dashSales").textContent=money(sales);
   document.getElementById("dashSalesReceived").textContent=`Pagamentos Recebidos ${money(received)}`;
   document.getElementById("dashSalesPending").textContent=`Pagamentos Pendentes ${money(pending)}`;
   document.getElementById("dashBalance").textContent=money(balance);
+  const balanceCard=document.getElementById("dashBalanceCard");
+  balanceCard.classList.toggle("balance-negative",balance<0);
+  balanceCard.classList.toggle("balance-positive",balance>=0);
+  document.getElementById("dashBalanceExpenses").textContent=`Saídas ${money(stockExpenses)}`;
+  document.getElementById("dashBalanceReceived").textContent=`Entradas ${money(received)}`;
   renderBuyerRanking();renderFlavorRanking();
 }
 function renderBuyerRanking(){
@@ -559,24 +583,35 @@ function renderFlavorRanking(){
 function renderStock(){
   const q=(document.getElementById("stockSearch")?.value||"").toLowerCase(),filter=document.getElementById("stockFilter")?.value||"";
   const rows=db.products.filter(p=>{const [cls]=statusProduct(p);return (p.name+" "+p.cat+" "+p.spec+" "+p.brand).toLowerCase().includes(q)&&(!filter||cls===filter)});
-  const activeProducts=db.products.filter(p=>!p.finished);document.getElementById("stockCount").textContent=activeProducts.reduce((sum,p)=>sum+(Number(p.stock)||0),0);document.getElementById("stockValue").textContent=money(activeProducts.reduce((sum,p)=>sum+Math.round((Number(p.cost)||0)*100),0)/100);
+  const activeProducts=db.products.filter(p=>!p.finished);document.getElementById("stockCount").textContent=activeProducts.length;document.getElementById("stockValue").textContent=money(activeProducts.reduce((sum,p)=>sum+Math.round((Number(p.cost)||0)*100),0)/100);
   document.getElementById("stockTable").innerHTML=rows.map(p=>`<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.spec)}</td><td>${esc(p.brand)}</td><td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td><td><div class="stock-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button><button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></div></td><td class="stock-finished-cell"><div class="stock-finished-control"><input type="checkbox" ${p.finished?"checked":""} aria-label="Marcar ${esc(p.name)} como acabou" onchange="toggleProductFinished('${p.id}',this.checked)"></div></td></tr>`).join("")||`<tr><td colspan="8" class="empty">Nenhum produto encontrado.</td></tr>`;
 }
 async function toggleProductFinished(id,finished){const p=db.products.find(x=>x.id===id);if(!p)return;p.finished=finished;try{await saveRow("products",{id:p.id,name:p.name,cat:p.cat||"",brand:p.brand||"",spec:p.spec||"",stock:p.stock,unit:p.unit,cost:p.cost,price:p.price||0,min:p.min,purchase_date:p.purchaseDate||null,finished});save()}catch(e){notify("Erro ao atualizar produto: "+e.message,true)}}
 
+function countOrderCones(orders){return orders.reduce((total,order)=>total+String(order.items||"").split(/\s*[|+]\s*/).reduce((sum,item)=>{if(!item.trim())return sum;const quantity=item.match(/^\s*(\d+)\s*x?\s*/i);return sum+(quantity?Number(quantity[1]):1)},0),0)}
 function renderOrders(){
   const q=(document.getElementById("orderSearch")?.value||"").toLowerCase(),filter=document.getElementById("orderFilter")?.value||"";
-  const rows=db.orders.filter(o=>(o.client+" "+o.items).toLowerCase().includes(q)&&(!filter||o.steps[filter])).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+  const status=filter.startsWith("nao_")?filter.slice(4):filter,expected=!filter.startsWith("nao_");
+  const rows=db.orders.filter(o=>(o.client+" "+o.items).toLowerCase().includes(q)&&(!filter||Boolean(o.steps[status])===expected)).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
   const received=db.orders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0),toReceive=db.orders.filter(o=>!o.steps.pago).reduce((s,o)=>s+o.total,0);
-  document.getElementById("orderCount").textContent=db.orders.length;document.getElementById("orderReceived").textContent=money(received);document.getElementById("orderToReceive").textContent=money(toReceive);document.getElementById("orderTotal").textContent=money(db.orders.reduce((s,o)=>s+o.total,0));
-  document.getElementById("orderCards").innerHTML=rows.map(o=>{const complete=o.steps.feito&&o.steps.pago&&o.steps.entregue,steps=[["Feito",o.steps.feito],["Pago",o.steps.pago],["Entregue",o.steps.entregue]];return `<article class="order"><div class="order-top"><h3>${complete?"✓ ":""}Pedido #${o.id.slice(-5).toUpperCase()}</h3><div class="order-stage-badges">${steps.map(([label,done])=>`<span class="badge ${done?"ok":"warn"}">${done?"✓":"○"} ${label}</span>`).join("")}</div></div><p>📅 ${formatDate(o.date)} • 👤 <b>${esc(o.client)}</b></p><p>🧁 ${esc(o.items)}</p><div class="order-footer"><div class="order-total">${money(o.total)}</div><div class="order-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar pedido" title="Editar pedido" onclick="openOrder('${o.id}')">✎</button><button class="btn small order-icon-btn" aria-label="Excluir pedido" title="Excluir pedido" onclick="deleteOrder('${o.id}')">🗑</button></div></div></article>`}).join("")||`<div class="empty">Nenhum pedido encontrado.</div>`;
+  const overdue=db.orders.filter(o=>!o.steps.pago&&o.payment&&o.payment<today()),overdueValue=overdue.reduce((sum,o)=>sum+(Number(o.total)||0),0),sales=db.orders.reduce((sum,o)=>sum+(Number(o.total)||0),0);
+  const coneCount=countOrderCones(db.orders),madeConeCount=countOrderCones(db.orders.filter(o=>o.steps.feito));
+  document.getElementById("overduePaymentsCard").classList.toggle("has-overdue",overdue.length>0);
+  document.getElementById("orderCount").textContent=db.orders.length;document.getElementById("orderCountLabel").textContent=db.orders.length===1?"Pedido":"Pedidos";document.getElementById("orderConeCount").textContent=coneCount;document.getElementById("orderConeLabel").textContent=coneCount===1?"Cone":"Cones";document.getElementById("orderDoneCount").textContent=db.orders.filter(o=>o.steps.feito).length;document.getElementById("orderPaidCount").textContent=db.orders.filter(o=>o.steps.pago).length;document.getElementById("orderDeliveredCount").textContent=db.orders.filter(o=>o.steps.entregue).length;document.getElementById("orderMadeConeCount").textContent=madeConeCount;document.getElementById("orderOverdueCount").textContent=overdue.length;document.getElementById("orderOverdueValue").textContent=money(overdueValue);
+  document.getElementById("orderSales").textContent=money(sales);document.getElementById("orderSalesReceived").textContent=`Pagamentos Recebidos ${money(received)}`;document.getElementById("orderSalesPending").textContent=`Pagamentos Pendentes ${money(toReceive)}`;
+  document.getElementById("orderCards").innerHTML=rows.map(o=>{const steps=[["Feito",o.steps.feito],["Pago",o.steps.pago],["Entregue",o.steps.entregue]];return `<article class="order"><div class="order-top"><h3>👤 ${esc(o.client)}</h3><div class="order-stage-badges">${steps.map(([label,done])=>`<span class="badge ${done?"ok":"warn"}">${done?"✓":"○"} ${label}</span>`).join("")}</div></div><p>📅 ${formatDate(o.date)}</p><p>🧁 ${esc(o.items)}</p><div class="order-footer"><div class="order-total">${money(o.total)}</div><div class="order-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar pedido" title="Editar pedido" onclick="openOrder('${o.id}')">✎</button><button class="btn small order-icon-btn" aria-label="Excluir pedido" title="Excluir pedido" onclick="deleteOrder('${o.id}')">🗑</button></div></div></article>`}).join("")||`<div class="empty">Nenhum pedido encontrado.</div>`;
 }
 function renderCash(){
-  const q=(document.getElementById("cashSearch")?.value||"").toLowerCase(),filter=document.getElementById("cashFilter")?.value||"";
-  const rows=db.cash.filter(c=>(c.desc+" "+c.cat+" "+c.method).toLowerCase().includes(q)&&(!filter||c.type===filter));
   const input=db.cash.filter(c=>c.type==="Entrada").reduce((s,c)=>s+c.value,0),output=db.cash.filter(c=>c.type==="Saída").reduce((s,c)=>s+c.value,0),balance=input-output;
-  document.getElementById("cashIn").textContent=money(input);document.getElementById("cashIn2").textContent=money(input);document.getElementById("cashOut").textContent=money(output);document.getElementById("cashOut2").textContent=money(output);document.getElementById("cashBalance").textContent=money(balance);const r=document.getElementById("cashBalance2");r.textContent=money(balance);r.classList.toggle("cash-positive",balance>=0);r.classList.toggle("cash-negative",balance<0);document.getElementById("cashCount").textContent=db.cash.length;
-  document.getElementById("cashTable").innerHTML=rows.map(c=>`<tr><td>${formatDate(c.date)}</td><td><span class="badge ${c.type==="Entrada"?"ok":"danger"}">● ${c.type}</span></td><td><b>${esc(c.desc)}</b></td><td>${esc(c.cat)}</td><td>${esc(c.method)}</td><td class="${c.type==="Entrada"?"cash-positive":"cash-negative"}">${c.type==="Entrada"?"+":"−"} ${money(c.value)}</td><td><button class="btn small" onclick="deleteCash('${c.id}')">Excluir</button></td></tr>`).join("")||`<tr><td colspan="7" class="empty">Nenhuma movimentação encontrada.</td></tr>`;
+  const orderIncome=db.orders.filter(order=>order.steps.pago).reduce((sum,order)=>sum+(Number(order.total)||0),0);
+  const stockExpenses=db.products.reduce((sum,product)=>sum+(Number(product.cost)||0),0);
+  const totalIncome=input+orderIncome,totalExpenses=output+stockExpenses,preReturn=totalIncome-totalExpenses;
+  const returnPercent=getCashReturnPercent(),cashReturn=Math.max(0,preReturn)*returnPercent/100,finalResult=preReturn-cashReturn;
+  document.getElementById("cashIn").textContent=money(input);document.getElementById("cashOut").textContent=money(output);document.getElementById("cashBalance").textContent=money(balance);document.getElementById("cashCount").textContent=db.cash.length;
+  document.getElementById("dreCashIncome").textContent=money(input);document.getElementById("dreOrderIncome").textContent=money(orderIncome);document.getElementById("cashIn2").textContent=money(totalIncome);
+  document.getElementById("dreCashExpenses").textContent=money(output);document.getElementById("dreStockExpenses").textContent=money(stockExpenses);document.getElementById("cashOut2").textContent=money(totalExpenses);
+  document.getElementById("dreBeforeReturn").textContent=money(preReturn);document.getElementById("dreReturnLabel").textContent=`Retorno ao caixa (${returnPercent}%)`;document.getElementById("dreCashReturn").textContent=money(cashReturn);
+  const result=document.getElementById("cashBalance2");result.textContent=money(finalResult);result.classList.toggle("cash-positive",finalResult>=0);result.classList.toggle("cash-negative",finalResult<0);
 }
 
 function openModal(title,body){document.getElementById("modalTitle").textContent=title;document.getElementById("modalBody").innerHTML=body;document.getElementById("modal").classList.add("show")}
@@ -594,14 +629,15 @@ async function deleteProduct(id){const product=db.products.find(item=>item.id===
 function openOrder(id){
   const o=db.orders.find(x=>x.id===id)||{id:"",date:today(),client:"",items:"",total:0,steps:{feito:true,pago:false,entregue:false}};
   const orderRows=o.items?String(o.items).split(" | ").map(item=>{const m=item.match(/^\s*(\d+)\s*x\s*(.*)$/i);return {quantity:m?m[1]:1,name:m?m[2].trim():item.trim()}}):[{quantity:1,name:""}];
-  openModal(id?"Editar pedido":"Novo pedido",`<form class="form" onsubmit="saveOrder(event,'${id||""}')"><div class="field"><label>Data</label><input class="input" type="date" name="date" value="${o.date}" required></div><div class="field"><label>Cliente</label><input class="input" name="client" value="${esc(o.client)}" required></div><div class="field full"><div class="order-item-head"><label>Qntd Itens</label><label>Item do pedido</label></div><div id="orderItemRows"></div><button type="button" class="btn secondary btn-add-item" onclick="addOrderItemRow()">Adicionar mais itens</button></div><div class="field full"><label>Esteira de status</label><div class="order-stage-selector"><label><input type="checkbox" name="feito" ${o.steps.feito?"checked":""}> Feito</label><label><input type="checkbox" name="pago" ${o.steps.pago?"checked":""}> Pago</label><label><input type="checkbox" name="entregue" ${o.steps.entregue?"checked":""}> Entregue</label></div></div><div class="field"><label>Total do pedido</label><input class="input" type="number" step="0.01" name="total" value="${Number(o.total||0).toFixed(2)}" readonly></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar pedido</button></div></form>`);
+  openModal(id?"Editar pedido":"Novo pedido",`<form class="form" onsubmit="saveOrder(event,'${id||""}')"><div class="field"><label>Data</label><input class="input" type="date" name="date" value="${o.date}" required></div><div class="field"><label>Cliente</label><input class="input" name="client" value="${esc(o.client)}" required></div><div class="field full"><div class="order-item-head"><label>Qntd Itens</label><label>Item do pedido</label></div><div id="orderItemRows"></div><button type="button" class="btn secondary btn-add-item" onclick="addOrderItemRow()">Adicionar mais itens</button></div><div class="field full"><label>Esteira de status</label><div class="order-stage-selector"><label><input type="checkbox" name="feito" ${o.steps.feito?"checked":""}> Feito</label><label><input type="checkbox" name="pago" onchange="toggleOrderPaymentDate(this.checked)" ${o.steps.pago?"checked":""}> Pago</label><label><input type="checkbox" name="entregue" ${o.steps.entregue?"checked":""}> Entregue</label></div></div><div class="field" id="orderPaymentDate" style="display:${o.steps.pago?"none":"flex"}"><label>Data de pagamento</label><input class="input" type="date" name="payment" value="${esc(o.payment||"")}"></div><div class="field"><label>Total do pedido</label><input class="input" type="number" step="0.01" name="total" value="${Number(o.total||0).toFixed(2)}" readonly></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar pedido</button></div></form>`);
   orderRows.forEach(row=>addOrderItemRow(row.quantity,row.name));updateOrderTotal();
 }
+function toggleOrderPaymentDate(paid){const field=document.getElementById("orderPaymentDate");if(field)field.style.display=paid?"none":"flex"}
 window.addOrderItemRow=function(quantity=1,selectedName=""){
   const container=document.getElementById("orderItemRows");if(!container)return;const products=Array.isArray(db.configProducts)?db.configProducts:[];const options=products.map(item=>`<option value="${esc(item.name)}" ${item.name===selectedName?"selected":""}>${esc(item.name)}</option>`).join("");const legacyOption=selectedName&&!products.some(item=>item.name===selectedName)?`<option value="${esc(selectedName)}" selected>${esc(selectedName)}</option>`:"";const row=document.createElement("div");row.className="order-item-row";row.innerHTML=`<input class="input order-item-quantity" type="number" min="1" step="1" value="${esc(quantity)}" aria-label="Qntd Itens" oninput="updateOrderTotal()"><select class="select" aria-label="Item do pedido" onchange="updateOrderTotal()"><option value="">Selecione um produto</option>${options}${legacyOption}</select>`;container.appendChild(row);updateOrderTotal()
 };
 window.updateOrderTotal=function(){const total=[...document.querySelectorAll("#orderItemRows .order-item-row")].reduce((sum,row)=>{const q=Math.max(1,Number(row.querySelector("input").value)||1),name=row.querySelector("select").value,product=db.configProducts.find(item=>item.name===name);return sum+q*(product?Number(product.price)||0:0)},0);const input=document.querySelector('#modalBody input[name="total"]');if(input)input.value=total.toFixed(2)};
-async function saveOrder(e,id){e.preventDefault();const f=new FormData(e.target);const itemsRaw=[...document.querySelectorAll("#orderItemRows .order-item-row")].map(row=>{const q=Math.max(1,parseInt(row.querySelector("input").value,10)||1),name=row.querySelector("select").value;return name?`${q}x ${name}`:""}).filter(Boolean).join(" | ");const obj={id:id||uid(),date:f.get("date"),client:f.get("client"),items:itemsRaw,total:+f.get("total")||0,payment:"",feito:f.has("feito"),pago:f.has("pago"),entregue:f.has("entregue")};try{await saveRow("orders",obj);const local={id:obj.id,date:obj.date,client:obj.client,items:obj.items,total:obj.total,payment:"",steps:{feito:obj.feito,pago:obj.pago,entregue:obj.entregue}};if(id)db.orders=db.orders.map(o=>o.id===id?local:o);else db.orders.push(local);closeModal();save();notify("Pedido salvo.")}catch(e){notify("Erro ao salvar pedido: "+e.message,true)}}
+async function saveOrder(e,id){e.preventDefault();const f=new FormData(e.target);const itemsRaw=[...document.querySelectorAll("#orderItemRows .order-item-row")].map(row=>{const q=Math.max(1,parseInt(row.querySelector("input").value,10)||1),name=row.querySelector("select").value;return name?`${q}x ${name}`:""}).filter(Boolean).join(" | ");const obj={id:id||uid(),date:f.get("date"),client:f.get("client"),items:itemsRaw,total:+f.get("total")||0,payment:f.get("payment")||"",feito:f.has("feito"),pago:f.has("pago"),entregue:f.has("entregue")};try{await saveRow("orders",obj);const local={id:obj.id,date:obj.date,client:obj.client,items:obj.items,total:obj.total,payment:obj.payment,steps:{feito:obj.feito,pago:obj.pago,entregue:obj.entregue}};if(id)db.orders=db.orders.map(o=>o.id===id?local:o);else db.orders.push(local);closeModal();save();notify("Pedido salvo.")}catch(e){notify("Erro ao salvar pedido: "+e.message,true)}}
 async function deleteOrder(id){const order=db.orders.find(item=>item.id===id);if(!order)return;askConfirmation("Excluir pedido",`Tem certeza de que deseja excluir o pedido <b>#${esc(id.slice(-5).toUpperCase())}</b>?`,"Excluir pedido",async()=>{try{await removeRow("orders",id);db.orders=db.orders.filter(item=>item.id!==id);save();notify("Pedido excluído.")}catch(e){notify("Erro ao excluir pedido: "+e.message,true)}})}
 
 function openCash(){openModal("Novo lançamento",`<form class="form" onsubmit="saveCash(event)"><div class="field"><label>Data</label><input class="input" type="date" name="date" value="${today()}" required></div><div class="field"><label>Tipo</label><select class="select" name="type"><option>Entrada</option><option>Saída</option></select></div><div class="field full"><label>Descrição</label><input class="input" name="desc" required placeholder="Ex.: Venda de doces / Compra de ingredientes"></div><div class="field"><label>Categoria</label><input class="input" name="cat" value="Vendas" required></div><div class="field"><label>Forma de pagamento</label><select class="select" name="method"><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Transferência</option><option>Boleto</option></select></div><div class="field"><label>Valor</label><input class="input" type="number" step="0.01" name="value" required></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar lançamento</button></div></form>`)}
@@ -614,8 +650,47 @@ async function addConfigProduct(name,price,monthFilter="all"){
 async function saveConfigProductPrice(index,price){const product=db.configProducts[index];if(!product)return;product.price=Math.max(0,Number(price)||0);try{await saveRow("config_products",product);refreshAll();notify("Preço atualizado.")}catch(e){notify("Erro ao atualizar preço: "+e.message,true)}}
 async function removeConfigProduct(index,monthFilter="all"){const product=db.configProducts[index];if(!product)return;try{await removeRow("config_products",product.id);db.configProducts=db.configProducts.filter(item=>item.id!==product.id);openSettings(monthFilter);notify("Produto removido.")}catch(e){notify("Erro ao remover produto: "+e.message,true)}}
 function openSettings(monthFilter="all"){
-  const months=[...new Set([today().slice(0,7),...(db.configProducts||[]).map(item=>item.month)])].filter(Boolean).sort().reverse();const monthText=month=>new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"});const visible=(db.configProducts||[]).map((item,index)=>({...item,index})).filter(item=>monthFilter==="all"||item.month===monthFilter);
-  openModal("Configurações",`<div class="config-layout"><div class="config-panel"><div class="field" style="margin-bottom:12px"><label for="settingsMonth">Filtrar por mês</label><select class="select" id="settingsMonth" onchange="openSettings(this.value)"><option value="all" ${monthFilter==="all"?"selected":""}>Todos os meses</option>${months.map(month=>`<option value="${month}" ${monthFilter===month?"selected":""}>${monthText(month)}</option>`).join("")}</select></div><div class="config-header"><h3>Produtos Cadastrados</h3></div><form onsubmit="event.preventDefault(); addConfigProduct(this.name.value,this.price.value,document.getElementById('settingsMonth').value); this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><input class="input" name="name" placeholder="Ex.: Cone Doce de Leite" style="flex:1;min-width:180px"><input class="input" name="price" type="number" min="0" step="0.01" placeholder="Preço R$" aria-label="Preço do produto" style="width:115px"><button class="btn small" type="submit">+ Adicionar</button></form><div class="config-list">${visible.length?visible.map(item=>`<div class="config-item"><div><strong>${esc(item.name)}</strong></div><div class="config-actions"><input class="input" type="number" min="0" step="0.01" value="${Number(item.price)||0}" aria-label="Preço de ${esc(item.name)}" onchange="saveConfigProductPrice(${item.index},this.value)" style="width:105px;padding:6px 8px"><button class="btn small" onclick="removeConfigProduct(${item.index},'${monthFilter}')">Excluir</button></div></div>`).join(""): `<div class="empty">Nenhum produto neste mês.</div>`}</div></div></div>`)
+  const months=[...new Set([today().slice(0,7),...(db.configProducts||[]).map(item=>item.month)])].filter(Boolean).sort().reverse();
+  const monthText=month=>new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+  const visible=(db.configProducts||[]).map((item,index)=>({...item,index})).filter(item=>monthFilter==="all"||item.month===monthFilter);
+  openModal("Configurações",`<div class="config-layout">
+    <div class="config-panel">
+      <div class="config-header"><h3>Retorno ao caixa</h3></div>
+      <form onsubmit="event.preventDefault();saveCashReturnPercent(this.returnPercent.value,'${monthFilter}')" style="display:flex;align-items:end;gap:8px;flex-wrap:wrap">
+        <div class="field" style="flex:1;min-width:180px"><label for="cashReturnPercent">Percentual destinado ao caixa (%)</label><input class="input" id="cashReturnPercent" name="returnPercent" type="number" min="0" max="100" step="0.01" value="${getCashReturnPercent()}" required></div>
+        <button class="btn small" type="submit">Salvar</button>
+      </form>
+    </div>
+    <div class="config-panel">
+      <div class="field" style="margin-bottom:12px"><label for="settingsMonth">Filtrar por mês</label><select class="select" id="settingsMonth" onchange="openSettings(this.value)"><option value="all" ${monthFilter==="all"?"selected":""}>Todos os meses</option>${months.map(month=>`<option value="${month}" ${monthFilter===month?"selected":""}>${monthText(month)}</option>`).join("")}</select></div>
+      <div class="config-header"><h3>Produtos Cadastrados</h3></div>
+      <form onsubmit="event.preventDefault();addConfigProduct(this.name.value,this.price.value,document.getElementById('settingsMonth').value);this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><input class="input" name="name" placeholder="Ex.: Cone Doce de Leite" style="flex:1;min-width:180px"><input class="input" name="price" type="number" min="0" step="0.01" placeholder="Preço R$" aria-label="Preço do produto" style="width:115px"><button class="btn small" type="submit">+ Adicionar</button></form>
+      <div class="config-list">${visible.length?visible.map(item=>`<div class="config-item"><div><strong>${esc(item.name)}</strong></div><div class="config-actions"><input class="input" type="number" min="0" step="0.01" value="${Number(item.price)||0}" aria-label="Preço de ${esc(item.name)}" onchange="saveConfigProductPrice(${item.index},this.value)" style="width:105px;padding:6px 8px"><button class="btn small" onclick="removeConfigProduct(${item.index},'${monthFilter}')">Excluir</button></div></div>`).join(""): `<div class="empty">Nenhum produto neste mês.</div>`}</div>
+    </div>
+  </div>`)
+}
+function saveCashReturnPercent(value,monthFilter="all"){
+  const percent=Number(value);
+  if(!Number.isFinite(percent)||percent<0||percent>100){notify("Informe um percentual entre 0 e 100.",true);return}
+  localStorage.setItem(CASH_RETURN_KEY,String(percent));renderCash();openSettings(monthFilter);notify("Percentual de retorno ao caixa salvo.")
+}
+async function exportDrePdf(){
+  const JsPdf=window.jspdf?.jsPDF;
+  if(!JsPdf){notify("Não foi possível carregar a biblioteca para gerar o PDF.",true);return}
+  const logo=document.querySelector(".logo");
+  try{await logo.decode()}catch{}
+  if(!logo?.naturalWidth){notify("Não foi possível carregar o logo para o PDF.",true);return}
+  const pdf=new JsPdf(),pageWidth=pdf.internal.pageSize.getWidth(),margin=20,logoMaxWidth=58,logoMaxHeight=48;
+  const logoScale=Math.min(logoMaxWidth/logo.naturalWidth,logoMaxHeight/logo.naturalHeight),logoWidth=logo.naturalWidth*logoScale,logoHeight=logo.naturalHeight*logoScale;
+  pdf.setFillColor(248,223,232);pdf.rect(0,0,pageWidth,8,"F");pdf.addImage(logo,"PNG",(pageWidth-logoWidth)/2,16,logoWidth,logoHeight);
+  const titleY=16+logoHeight+10;
+  pdf.setFont("helvetica","bold");pdf.setFontSize(18);pdf.setTextColor(113,53,31);pdf.text("DRE SIMPLIFICADA",pageWidth/2,titleY,{align:"center"});
+  pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.setTextColor(124,102,92);pdf.text("Valores acumulados - regime de caixa",pageWidth/2,titleY+8,{align:"center"});pdf.text(`Emitido em ${formatDate(today())}`,pageWidth/2,titleY+14,{align:"center"});
+  const dividerY=titleY+21;pdf.setDrawColor(230,200,208);pdf.setLineWidth(.5);pdf.line(margin,dividerY,pageWidth-margin,dividerY);
+  const rows=[...document.querySelectorAll("#caixa .dre-row")].map(row=>{const amount=row.querySelector("strong");return {label:row.querySelector("span").textContent,value:amount.textContent,total:row.classList.contains("dre-result"),subtotal:row.classList.contains("dre-subtotal"),color:amount.classList.contains("cash-positive")?[76,137,86]:amount.classList.contains("cash-negative")?[182,77,88]:[79,48,39]}});
+  rows.forEach((row,index)=>{const y=dividerY+14+index*13;if(row.total){pdf.setFillColor(250,239,242);pdf.roundedRect(margin,y-8,pageWidth-margin*2,13,2,2,"F")}pdf.setFont("helvetica",row.total||row.subtotal?"bold":"normal");pdf.setFontSize(row.total?12:11);pdf.setTextColor(79,48,39);pdf.text(row.label,margin+4,y);pdf.setTextColor(...row.color);pdf.text(row.value,pageWidth-margin-4,y,{align:"right"})});
+  pdf.setFont("helvetica","normal");pdf.setFontSize(9);pdf.setTextColor(152,123,112);pdf.text("Doce Bia - Gestão & Fluxo de Caixa",pageWidth/2,280,{align:"center"});
+  pdf.save(`DRE-Simplificada-${today()}.pdf`)
 }
 function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="backup-doce-gestao.json";a.click();URL.revokeObjectURL(a.href)}
 
