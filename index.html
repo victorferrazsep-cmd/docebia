@@ -229,6 +229,7 @@ tbody tr:hover{background:#f8d4df}
 .buyer-name{max-width:100%;padding:2px 4px;color:var(--brown);font-size:13px;font-weight:800;text-align:center;overflow-wrap:anywhere}
 .buyer-sales{display:flex;width:100%;min-height:72px;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px 5px;border:1px solid #d4577f;border-radius:8px;background:#e66b91;color:#fff;text-align:center}
 .buyer-rank .buyer-sales{margin-top:auto}
+.buyer-rank .buyer-name + .buyer-sales{transform:translateY(-2px)}
 .buyer-rank.place-1 .buyer-sales{min-height:92px;border-color:#b83c68;background:#c84875}
 .buyer-rank.place-3 .buyer-sales{min-height:64px;border-color:#c84470;background:#d95782}
 .buyer-sales strong{max-width:100%;font-size:22px;font-weight:900;color:#fff;overflow-wrap:anywhere}
@@ -446,61 +447,91 @@ tbody tr:hover{background:#f8d4df}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ============================================================*/
+
+const SUPABASE_URL = "https://jsxurjbragxnutqvadyl.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_0m5jb1WEkjJcMk-WxfRd-w_M0mRmo8T";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const KEY="doceGestao_v1";
 const brl = v => Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const today = () => new Date().toISOString().slice(0,10);
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const isConfigured = () => !SUPABASE_URL.includes("COLE_AQUI") && !SUPABASE_ANON_KEY.includes("COLE_AQUI");
 
-const initial = {
-  configProducts:["Cone Doce de Leite","Cone Brigadeiro","Cone Beijinho"],
-  products:[
-    {id:uid(),name:"Brigadeiro Gourmet",cat:"Doces",spec:"Unidade 20g",stock:45,unit:"unid",cost:1.50,price:4.50,min:15},
-    {id:uid(),name:"Cone Trufado",cat:"Doces",spec:"Chocolate + brigadeiro",stock:18,unit:"unid",cost:4.20,price:10.00,min:10},
-    {id:uid(),name:"Bolo de Pote",cat:"Bolos",spec:"250ml",stock:12,unit:"unid",cost:5.00,price:14.00,min:8},
-    {id:uid(),name:"Farinha de Trigo",cat:"Ingredientes",spec:"Pacote 5kg",stock:3,unit:"kg",cost:13.95,price:0,min:2},
-    {id:uid(),name:"Chocolate",cat:"Ingredientes",spec:"Barra 1kg",stock:2,unit:"kg",cost:31.50,price:0,min:3},
-    {id:uid(),name:"Embalagem Cone",cat:"Embalagens",spec:"Grande 15x10x27",stock:50,unit:"unid",cost:.58,price:0,min:20},
-    {id:uid(),name:"Embalagem Bolo",cat:"Embalagens",spec:"Média 20x10x15",stock:50,unit:"unid",cost:.75,price:0,min:20}
-  ],
-  orders:[
-    {id:uid(),date:today(),client:"Maria",items:"20 Brigadeiros + 5 Cones",total:140,payment:"Pix",status:"Pago"},
-    {id:uid(),date:today(),client:"Ana",items:"1 Bolo de Pote + 10 Brigadeiros",total:59,payment:"Cartão",status:"Pendente"}
-  ],
-  cash:[
-    {id:uid(),date:today(),type:"Entrada",desc:"Pedido Maria",cat:"Vendas",method:"Pix",value:140},
-    {id:uid(),date:today(),type:"Saída",desc:"Compra de chocolate",cat:"Ingredientes",method:"Pix",value:31.50}
-  ]
-};
-let db = JSON.parse(localStorage.getItem(KEY)||"null") || initial;
-if(!db.configProducts || !Array.isArray(db.configProducts)) db.configProducts = [...initial.configProducts];
-db.configProducts = db.configProducts.map(item => typeof item === "string"
-  ? {name:item,price:0,month:today().slice(0,7)}
-  : {name:String(item.name || ""),price:Number(item.price) || 0,month:item.month || today().slice(0,7)});
-db.products = (Array.isArray(db.products) ? db.products : []).map(product => ({...product,brand:product.brand || "",purchaseDate:product.purchaseDate || "",finished:Boolean(product.finished)}));
-db.orders = (Array.isArray(db.orders) ? db.orders : []).map(order => {
-  if(!order.steps){
-    order.steps = {
-      feito:["Pronto","Entregue"].includes(order.status),
-      pago:order.status==="Pago",
-      entregue:order.status==="Entregue"
-    };
-  } else {
-    order.steps = {feito:Boolean(order.steps.feito),pago:Boolean(order.steps.pago),entregue:Boolean(order.steps.entregue)};
-  }
-  return order;
-});
-function save(){localStorage.setItem(KEY,JSON.stringify(db));refreshAll()}
+let db = {configProducts:[], products:[], orders:[], cash:[]};
+let loading = true;
+let confirmationAction = null;
+
 function money(v){return brl(v)}
-function monthLabel(){
-  document.getElementById("monthName").textContent=new Date().toLocaleDateString("pt-BR",{month:"long"}).toUpperCase();
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function formatDate(d){return d?new Date(d+"T12:00:00").toLocaleDateString("pt-BR"):""}
+function monthLabel(){document.getElementById("monthName").textContent=new Date().toLocaleDateString("pt-BR",{month:"long"}).toUpperCase()}
+function statusProduct(p){if(p.stock<=0)return ["danger","Sem estoque"];if(p.stock<=p.min)return ["warn","Estoque baixo"];return ["ok","Normal"]}
+function notify(message,error=false){
+  console[error?"error":"log"](message);
+  const old=document.getElementById("dbStatus"); if(old) old.remove();
+  const el=document.createElement("div"); el.id="dbStatus"; el.textContent=message;
+  el.style.cssText=`position:fixed;right:18px;bottom:18px;z-index:100;padding:10px 14px;border-radius:10px;background:${error?'#c85c68':'#72a878'};color:#fff;font-weight:800;font-size:12px;box-shadow:0 8px 25px rgba(0,0,0,.18)`;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),3500);
 }
-function statusProduct(p){
-  if(p.stock<=0) return ["danger","Sem estoque"];
-  if(p.stock<=p.min) return ["warn","Estoque baixo"];
-  return ["ok","Normal"];
+
+async function selectTable(table){
+  const {data,error}=await sb.from(table).select("*");
+  if(error) throw error; return data||[];
 }
+async function loadDb(){
+  if(!isConfigured()){
+    notify("Configure SUPABASE_URL e SUPABASE_ANON_KEY no index.html.",true);
+    loading=false; refreshAll(); return;
+  }
+  try{
+    const [configProducts,products,orders,cash]=await Promise.all([
+      selectTable("config_products"),selectTable("products"),selectTable("orders"),selectTable("cash")
+    ]);
+    db.configProducts=configProducts.map(x=>({name:String(x.name||""),price:Number(x.price)||0,month:x.month||today().slice(0,7),id:x.id}));
+    db.products=products.map(x=>({...x,stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min)||1,purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
+    db.orders=orders.map(x=>({id:x.id,date:x.date,client:x.client,items:x.items||"",total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
+    db.cash=cash.map(x=>({id:x.id,date:x.date,type:x.type,desc:x.desc,cat:x.cat,method:x.method,value:Number(x.value)||0}));
+    await migrateLegacyLocalStorageIfNeeded();
+    loading=false; refreshAll();
+  }catch(error){
+    loading=false; notify("Erro ao carregar o banco: "+(error.message||error),true); refreshAll();
+  }
+}
+
+async function migrateLegacyLocalStorageIfNeeded(){
+  const raw=localStorage.getItem(KEY); if(!raw || localStorage.getItem(KEY+"_supabase_migrated")) return;
+  let old; try{old=JSON.parse(raw)}catch{return}
+  if(!old || !Array.isArray(old.products) && !Array.isArray(old.orders) && !Array.isArray(old.cash)) return;
+  const empty=!db.products.length&&!db.orders.length&&!db.cash.length&&!db.configProducts.length;
+  if(!empty) return;
+  const config=(old.configProducts||[]).map(item=>typeof item==="string"?{id:uid(),name:item,price:0,month:today().slice(0,7)}:{id:item.id||uid(),name:String(item.name||""),price:Number(item.price)||0,month:item.month||today().slice(0,7)});
+  const products=(old.products||[]).map(p=>({id:p.id||uid(),name:p.name||"",cat:p.cat||"",brand:p.brand||"",spec:p.spec||"",stock:Number(p.stock)||0,unit:p.unit||"unid",cost:Number(p.cost)||0,price:Number(p.price)||0,min:Number(p.min)||1,purchase_date:p.purchaseDate||null,finished:Boolean(p.finished)}));
+  const orders=(old.orders||[]).map(o=>({id:o.id||uid(),date:o.date||today(),client:o.client||"",items:o.items||"",total:Number(o.total)||0,payment:o.payment||"",feito:Boolean(o.steps?.feito ?? (["Pronto","Entregue"].includes(o.status))),pago:Boolean(o.steps?.pago ?? (o.status==="Pago")),entregue:Boolean(o.steps?.entregue ?? (o.status==="Entregue"))}));
+  const cash=(old.cash||[]).map(c=>({id:c.id||uid(),date:c.date||today(),type:c.type||"Entrada",desc:c.desc||"",cat:c.cat||"",method:c.method||"",value:Number(c.value)||0}));
+  const results=await Promise.all([
+    config.length?sb.from("config_products").insert(config):Promise.resolve({error:null}),
+    products.length?sb.from("products").insert(products):Promise.resolve({error:null}),
+    orders.length?sb.from("orders").insert(orders):Promise.resolve({error:null}),
+    cash.length?sb.from("cash").insert(cash):Promise.resolve({error:null})
+  ]);
+  const failed=results.find(r=>r.error); if(failed?.error) throw failed.error;
+  localStorage.setItem(KEY+"_supabase_migrated","1");
+  const [configProducts,products2,orders2,cash2]=await Promise.all([selectTable("config_products"),selectTable("products"),selectTable("orders"),selectTable("cash")]);
+  db.configProducts=configProducts.map(x=>({id:x.id,name:x.name,price:Number(x.price)||0,month:x.month}));
+  db.products=products2.map(x=>({...x,stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min)||1,purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
+  db.orders=orders2.map(x=>({id:x.id,date:x.date,client:x.client,items:x.items,total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
+  db.cash=cash2.map(x=>({id:x.id,date:x.date,type:x.type,desc:x.desc,cat:x.cat,method:x.method,value:Number(x.value)||0}));
+  notify("Dados antigos do navegador migrados para o Supabase.");
+}
+
+async function saveRow(table,row){const {error}=await sb.from(table).upsert(row,{onConflict:"id"});if(error)throw error}
+async function removeRow(table,id){const {error}=await sb.from(table).delete().eq("id",id);if(error)throw error}
+async function save(){refreshAll()}
 function refreshAll(){renderDashboard();renderStock();renderOrders();renderCash()}
+
 function renderDashboard(){
   const received=db.orders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0);
   const sales=db.orders.reduce((s,o)=>s+o.total,0);
@@ -512,375 +543,84 @@ function renderDashboard(){
   document.getElementById("dashSalesReceived").textContent=`Pagamentos Recebidos ${money(received)}`;
   document.getElementById("dashSalesPending").textContent=`Pagamentos Pendentes ${money(pending)}`;
   document.getElementById("dashBalance").textContent=money(balance);
-  renderBuyerRanking();
-  renderFlavorRanking();
+  renderBuyerRanking();renderFlavorRanking();
 }
 function renderBuyerRanking(){
-  const buyers=new Map();
-  db.orders.forEach(order=>{
-    const name=String(order.client||"").trim();
-    if(!name) return;
-    const key=name.toLowerCase();
-    const buyer=buyers.get(key)||{name,orders:0,total:0};
-    buyer.orders++;
-    buyer.total+=Number(order.total)||0;
-    buyers.set(key,buyer);
-  });
+  const buyers=new Map(); db.orders.forEach(order=>{const name=String(order.client||"").trim();if(!name)return;const key=name.toLowerCase();const buyer=buyers.get(key)||{name,orders:0,total:0};buyer.orders++;buyer.total+=Number(order.total)||0;buyers.set(key,buyer)});
   const ranking=[...buyers.values()].sort((a,b)=>b.total-a.total||b.orders-a.orders).slice(0,3);
-  if(!ranking.length){
-    document.getElementById("buyerRanking").innerHTML='<div class="empty buyer-empty">Nenhum comprador encontrado.</div>';
-    return;
-  }
-  document.getElementById("buyerRanking").innerHTML=ranking.map((buyer,index)=>{
-    const place=index+1;
-    const medal=place===1?"🥇":place===2?"🥈":"🥉";
-    return `<article class="buyer-rank place-${place}">
-      <div class="rank-avatar"><img class="buyer-avatar" src="img${place}.png" alt="Imagem do ${place}º lugar" loading="lazy"><span class="flavor-medal">${medal}</span></div>
-      <div class="buyer-name" title="${esc(buyer.name)}">${esc(buyer.name)}</div>
-      <div class="buyer-sales"><strong>${money(buyer.total)}</strong><small>${buyer.orders} ${buyer.orders===1?"venda":"vendas"}</small></div>
-    </article>`;
-  }).join("");
+  if(!ranking.length){document.getElementById("buyerRanking").innerHTML='<div class="empty buyer-empty">Nenhum comprador encontrado.</div>';return}
+  document.getElementById("buyerRanking").innerHTML=ranking.map((buyer,index)=>{const place=index+1,medal=place===1?"🥇":place===2?"🥈":"🥉";return `<article class="buyer-rank place-${place}"><div class="rank-avatar"><img class="buyer-avatar" src="img${place}.png" alt="Imagem do ${place}º lugar" loading="lazy"><span class="flavor-medal">${medal}</span></div><div class="buyer-name" title="${esc(buyer.name)}">${esc(buyer.name)}</div><div class="buyer-sales"><strong>${money(buyer.total)}</strong><small>${buyer.orders} ${buyer.orders===1?"venda":"vendas"}</small></div></article>`}).join("");
 }
 function renderFlavorRanking(){
-  const flavors=[
-    {name:"Brigadeiro",pattern:/\bbrigadeiros?\b/,quantity:0},
-    {name:"Beijinho",pattern:/\bbeijinhos?\b/,quantity:0},
-    {name:"Casadinho",pattern:/\bcasadinhos?\b/,quantity:0},
-    {name:"Doce de Leite",pattern:/\bdoce\s+de\s+leite\b/,quantity:0}
-  ];
-  db.orders.forEach(order=>{
-    String(order.items||"").split(/\s*[|+]\s*/).forEach(item=>{
-      const quantityMatch=item.match(/^\s*(\d+)\s*x?\s*/i);
-      const quantity=quantityMatch?Number(quantityMatch[1]):1;
-      const normalized=item.toLocaleLowerCase("pt-BR");
-      flavors.forEach(flavor=>{
-        if(flavor.pattern.test(normalized)) flavor.quantity+=quantity;
-      });
-    });
-  });
-  const medals=["🥇","🥈","🥉","🏅"];
-  document.getElementById("flavorRanking").innerHTML=[...flavors]
-    .sort((a,b)=>b.quantity-a.quantity)
-    .map((flavor,index)=>{
-      const place=index+1;
-      return `<article class="flavor-rank place-${place}">
-        <div class="rank-avatar"><img class="buyer-avatar" src="img${place}${place}.png" alt="Imagem do ${place}º lugar no ranking de sabores" loading="lazy"><span class="flavor-medal">${medals[index]}</span></div>
-        <div class="buyer-name">${esc(flavor.name)}</div>
-        <div class="buyer-sales"><strong>${flavor.quantity}</strong><small>${flavor.quantity===1?"unidade vendida":"Vendas"}</small></div>
-      </article>`;
-    }).join("");
+  const flavors=[{name:"Brigadeiro",pattern:/\bbrigadeiros?\b/,quantity:0},{name:"Beijinho",pattern:/\bbeijinhos?\b/,quantity:0},{name:"Casadinho",pattern:/\bcasadinhos?\b/,quantity:0},{name:"Doce de Leite",pattern:/\bdoce\s+de\s+leite\b/,quantity:0}];
+  db.orders.forEach(order=>String(order.items||"").split(/\s*[|+]\s*/).forEach(item=>{const m=item.match(/^\s*(\d+)\s*x?\s*/i),q=m?Number(m[1]):1,n=item.toLocaleLowerCase("pt-BR");flavors.forEach(f=>{if(f.pattern.test(n))f.quantity+=q})}));
+  const medals=["🥇","🥈","🥉","🏅"];document.getElementById("flavorRanking").innerHTML=[...flavors].sort((a,b)=>b.quantity-a.quantity).map((flavor,index)=>{const place=index+1;return `<article class="flavor-rank place-${place}"><div class="rank-avatar"><img class="buyer-avatar" src="img${place}${place}.png" alt="Imagem do ${place}º lugar no ranking de sabores" loading="lazy"><span class="flavor-medal">${medals[index]}</span></div><div class="buyer-name">${esc(flavor.name)}</div><div class="buyer-sales"><strong>${flavor.quantity}</strong><small>${flavor.quantity===1?"unidade vendida":"Vendas"}</small></div></article>`}).join("");
 }
 function renderStock(){
-  const q=(document.getElementById("stockSearch")?.value||"").toLowerCase();
-  const filter=document.getElementById("stockFilter")?.value||"";
-  const rows=db.products.filter(p=>{
-    const [cls]=statusProduct(p);
-    return (p.name+" "+p.cat+" "+p.spec+" "+p.brand).toLowerCase().includes(q) && (!filter || cls===filter);
-  });
-  const activeProducts=db.products.filter(p=>!p.finished);
-  document.getElementById("stockCount").textContent=activeProducts.length;
-  document.getElementById("stockValue").textContent=money(activeProducts.reduce((s,p)=>s+p.stock*p.cost,0));
-  document.getElementById("stockTable").innerHTML=rows.map(p=>{
-    return `<tr>
-      <td><b>${esc(p.name)}</b></td><td>${esc(p.spec)}</td><td>${esc(p.brand)}</td>
-      <td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td>
-      <td><div class="stock-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button>
-      <button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></div></td>
-      <td class="stock-finished-cell"><div class="stock-finished-control"><input type="checkbox" ${p.finished?"checked":""} aria-label="Marcar ${esc(p.name)} como acabou" onchange="toggleProductFinished('${p.id}',this.checked)"></div></td>
-    </tr>`
-  }).join("") || `<tr><td colspan="8" class="empty">Nenhum produto encontrado.</td></tr>`;
+  const q=(document.getElementById("stockSearch")?.value||"").toLowerCase(),filter=document.getElementById("stockFilter")?.value||"";
+  const rows=db.products.filter(p=>{const [cls]=statusProduct(p);return (p.name+" "+p.cat+" "+p.spec+" "+p.brand).toLowerCase().includes(q)&&(!filter||cls===filter)});
+  const activeProducts=db.products.filter(p=>!p.finished);document.getElementById("stockCount").textContent=activeProducts.length;document.getElementById("stockValue").textContent=money(activeProducts.reduce((s,p)=>s+p.stock*p.cost,0));
+  document.getElementById("stockTable").innerHTML=rows.map(p=>`<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.spec)}</td><td>${esc(p.brand)}</td><td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td><td><div class="stock-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button><button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></div></td><td class="stock-finished-cell"><div class="stock-finished-control"><input type="checkbox" ${p.finished?"checked":""} aria-label="Marcar ${esc(p.name)} como acabou" onchange="toggleProductFinished('${p.id}',this.checked)"></div></td></tr>`).join("")||`<tr><td colspan="8" class="empty">Nenhum produto encontrado.</td></tr>`;
 }
-function toggleProductFinished(id,finished){
-  const product=db.products.find(item=>item.id===id);
-  if(!product) return;
-  product.finished=finished;
-  save();
-}
+async function toggleProductFinished(id,finished){const p=db.products.find(x=>x.id===id);if(!p)return;p.finished=finished;try{await saveRow("products",{id:p.id,name:p.name,cat:p.cat||"",brand:p.brand||"",spec:p.spec||"",stock:p.stock,unit:p.unit,cost:p.cost,price:p.price||0,min:p.min,purchase_date:p.purchaseDate||null,finished});save()}catch(e){notify("Erro ao atualizar produto: "+e.message,true)}}
+
 function renderOrders(){
-  const q=(document.getElementById("orderSearch")?.value||"").toLowerCase();
-  const filter=document.getElementById("orderFilter")?.value||"";
+  const q=(document.getElementById("orderSearch")?.value||"").toLowerCase(),filter=document.getElementById("orderFilter")?.value||"";
   const rows=db.orders.filter(o=>(o.client+" "+o.items).toLowerCase().includes(q)&&(!filter||o.steps[filter]));
-  const received=db.orders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0);
-  const toReceive=db.orders.filter(o=>!o.steps.pago).reduce((s,o)=>s+o.total,0);
-  document.getElementById("orderCount").textContent=db.orders.length;
-  document.getElementById("orderReceived").textContent=money(received);
-  document.getElementById("orderToReceive").textContent=money(toReceive);
-  document.getElementById("orderTotal").textContent=money(db.orders.reduce((s,o)=>s+o.total,0));
-  document.getElementById("orderCards").innerHTML=rows.map(o=>{
-    const complete=o.steps.feito&&o.steps.pago&&o.steps.entregue;
-    const steps=[['Feito',o.steps.feito],['Pago',o.steps.pago],['Entregue',o.steps.entregue]];
-    return `
-    <article class="order">
-      <div class="order-top">
-        <h3>${complete?"✓ ":""}Pedido #${o.id.slice(-5).toUpperCase()}</h3>
-        <div class="order-stage-badges">${steps.map(([label,done])=>`<span class="badge ${done?"ok":"warn"}">${done?"✓":"○"} ${label}</span>`).join("")}</div>
-      </div>
-      <p>📅 ${formatDate(o.date)} • 👤 <b>${esc(o.client)}</b></p>
-      <p>🧁 ${esc(o.items)}</p>
-      <div class="order-footer">
-        <div class="order-total">${money(o.total)}</div>
-        <div class="order-actions">
-          <button class="btn small secondary order-icon-btn" aria-label="Editar pedido" title="Editar pedido" onclick="openOrder('${o.id}')">✎</button>
-          <button class="btn small order-icon-btn" aria-label="Excluir pedido" title="Excluir pedido" onclick="deleteOrder('${o.id}')">🗑</button>
-        </div>
-      </div>
-    </article>`;
-  }).join("") || `<div class="empty">Nenhum pedido encontrado.</div>`;
+  const received=db.orders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0),toReceive=db.orders.filter(o=>!o.steps.pago).reduce((s,o)=>s+o.total,0);
+  document.getElementById("orderCount").textContent=db.orders.length;document.getElementById("orderReceived").textContent=money(received);document.getElementById("orderToReceive").textContent=money(toReceive);document.getElementById("orderTotal").textContent=money(db.orders.reduce((s,o)=>s+o.total,0));
+  document.getElementById("orderCards").innerHTML=rows.map(o=>{const complete=o.steps.feito&&o.steps.pago&&o.steps.entregue,steps=[["Feito",o.steps.feito],["Pago",o.steps.pago],["Entregue",o.steps.entregue]];return `<article class="order"><div class="order-top"><h3>${complete?"✓ ":""}Pedido #${o.id.slice(-5).toUpperCase()}</h3><div class="order-stage-badges">${steps.map(([label,done])=>`<span class="badge ${done?"ok":"warn"}">${done?"✓":"○"} ${label}</span>`).join("")}</div></div><p>📅 ${formatDate(o.date)} • 👤 <b>${esc(o.client)}</b></p><p>🧁 ${esc(o.items)}</p><div class="order-footer"><div class="order-total">${money(o.total)}</div><div class="order-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar pedido" title="Editar pedido" onclick="openOrder('${o.id}')">✎</button><button class="btn small order-icon-btn" aria-label="Excluir pedido" title="Excluir pedido" onclick="deleteOrder('${o.id}')">🗑</button></div></div></article>`}).join("")||`<div class="empty">Nenhum pedido encontrado.</div>`;
 }
 function renderCash(){
-  const q=(document.getElementById("cashSearch")?.value||"").toLowerCase();
-  const filter=document.getElementById("cashFilter")?.value||"";
+  const q=(document.getElementById("cashSearch")?.value||"").toLowerCase(),filter=document.getElementById("cashFilter")?.value||"";
   const rows=db.cash.filter(c=>(c.desc+" "+c.cat+" "+c.method).toLowerCase().includes(q)&&(!filter||c.type===filter));
-  const input=db.cash.filter(c=>c.type==="Entrada").reduce((s,c)=>s+c.value,0);
-  const output=db.cash.filter(c=>c.type==="Saída").reduce((s,c)=>s+c.value,0);
-  const balance=input-output;
-  document.getElementById("cashIn").textContent=money(input);document.getElementById("cashIn2").textContent=money(input);
-  document.getElementById("cashOut").textContent=money(output);document.getElementById("cashOut2").textContent=money(output);
-  document.getElementById("cashBalance").textContent=money(balance);
-  const cashResult=document.getElementById("cashBalance2");
-  cashResult.textContent=money(balance);
-  cashResult.classList.toggle("cash-positive",balance>=0);
-  cashResult.classList.toggle("cash-negative",balance<0);
-  document.getElementById("cashCount").textContent=db.cash.length;
-  document.getElementById("cashTable").innerHTML=rows.map(c=>`
-    <tr><td>${formatDate(c.date)}</td><td><span class="badge ${c.type==="Entrada"?"ok":"danger"}">● ${c.type}</span></td>
-    <td><b>${esc(c.desc)}</b></td><td>${esc(c.cat)}</td><td>${esc(c.method)}</td>
-    <td class="${c.type==="Entrada"?"cash-positive":"cash-negative"}">${c.type==="Entrada"?"+":"−"} ${money(c.value)}</td>
-    <td><button class="btn small" onclick="deleteCash('${c.id}')">Excluir</button></td></tr>`).join("") ||
-    `<tr><td colspan="7" class="empty">Nenhuma movimentação encontrada.</td></tr>`;
+  const input=db.cash.filter(c=>c.type==="Entrada").reduce((s,c)=>s+c.value,0),output=db.cash.filter(c=>c.type==="Saída").reduce((s,c)=>s+c.value,0),balance=input-output;
+  document.getElementById("cashIn").textContent=money(input);document.getElementById("cashIn2").textContent=money(input);document.getElementById("cashOut").textContent=money(output);document.getElementById("cashOut2").textContent=money(output);document.getElementById("cashBalance").textContent=money(balance);const r=document.getElementById("cashBalance2");r.textContent=money(balance);r.classList.toggle("cash-positive",balance>=0);r.classList.toggle("cash-negative",balance<0);document.getElementById("cashCount").textContent=db.cash.length;
+  document.getElementById("cashTable").innerHTML=rows.map(c=>`<tr><td>${formatDate(c.date)}</td><td><span class="badge ${c.type==="Entrada"?"ok":"danger"}">● ${c.type}</span></td><td><b>${esc(c.desc)}</b></td><td>${esc(c.cat)}</td><td>${esc(c.method)}</td><td class="${c.type==="Entrada"?"cash-positive":"cash-negative"}">${c.type==="Entrada"?"+":"−"} ${money(c.value)}</td><td><button class="btn small" onclick="deleteCash('${c.id}')">Excluir</button></td></tr>`).join("")||`<tr><td colspan="7" class="empty">Nenhuma movimentação encontrada.</td></tr>`;
 }
-function formatDate(d){return new Date(d+"T12:00:00").toLocaleDateString("pt-BR")}
-function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
-function openModal(title,body){
-  document.getElementById("modalTitle").textContent=title;
-  document.getElementById("modalBody").innerHTML=body;
-  document.getElementById("modal").classList.add("show");
-}
-let confirmationAction = null;
-function closeModal(){
-  confirmationAction = null;
-  document.getElementById("modal").classList.remove("show");
-}
-function askConfirmation(title,message,buttonText,action){
-  confirmationAction = action;
-  openModal(title,`
-    <div style="padding:18px">
-      <p style="margin:0;color:var(--text);line-height:1.5">${message}</p>
-      <div class="modal-footer" style="padding:18px 0 0">
-        <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
-        <button type="button" class="btn" onclick="runConfirmation()">🗑 ${esc(buttonText)}</button>
-      </div>
-    </div>
-  `);
-}
-function runConfirmation(){
-  const action = confirmationAction;
-  closeModal();
-  if(action) action();
-}
+function openModal(title,body){document.getElementById("modalTitle").textContent=title;document.getElementById("modalBody").innerHTML=body;document.getElementById("modal").classList.add("show")}
+function closeModal(){confirmationAction=null;document.getElementById("modal").classList.remove("show")}
+function askConfirmation(title,message,buttonText,action){confirmationAction=action;openModal(title,`<div style="padding:18px"><p style="margin:0;color:var(--text);line-height:1.5">${message}</p><div class="modal-footer" style="padding:18px 0 0"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button type="button" class="btn" onclick="runConfirmation()">🗑 ${esc(buttonText)}</button></div></div>`)}
+async function runConfirmation(){const action=confirmationAction;closeModal();if(action)await action()}
+
 function openProduct(id){
   const p=db.products.find(x=>x.id===id)||{id:"",name:"",cat:"",brand:"",spec:"",stock:0,unit:"unid",cost:0,price:0,min:1,purchaseDate:today()};
-  openModal(id?"Editar produto":"Novo produto",`
-  <form class="form" onsubmit="saveProduct(event,'${id||""}')">
-    <div class="field"><label>Produto</label><input class="input" name="name" required value="${esc(p.name)}"></div>
-    <div class="field full"><label>Especificação</label><input class="input" name="spec" value="${esc(p.spec)}" placeholder="Ex.: Pacote 1kg / 250ml / Unidade"></div>
-    <div class="field"><label>Marca</label><input class="input" name="brand" value="${esc(p.brand)}" placeholder="Marca do produto"></div>
-    <div class="field"><label>Quantidade</label><input class="input" name="stock" type="number" step="1" required value="${Math.round(Number(p.stock)||0)}"></div>
-    <div class="field"><label>Data da compra do estoque</label><input class="input" name="purchaseDate" type="date" value="${esc(p.purchaseDate)}"></div>
-    <div class="field"><label>Unidade</label><select class="select" name="unit"><option ${p.unit==="unid"?"selected":""}>unid</option><option ${p.unit==="kg"?"selected":""}>kg</option><option ${p.unit==="g"?"selected":""}>g</option><option ${p.unit==="L"?"selected":""}>L</option><option ${p.unit==="cx"?"selected":""}>cx</option></select></div>
-    <div class="field"><label>Custo</label><input class="input" name="cost" type="number" step="0.01" value="${p.cost}"></div>
-    <div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar produto</button></div>
-  </form>`);
+  openModal(id?"Editar produto":"Novo produto",`<form class="form" onsubmit="saveProduct(event,'${id||""}')"><div class="field"><label>Produto</label><input class="input" name="name" required value="${esc(p.name)}"></div><div class="field full"><label>Especificação</label><input class="input" name="spec" value="${esc(p.spec)}" placeholder="Ex.: Pacote 1kg / 250ml / Unidade"></div><div class="field"><label>Marca</label><input class="input" name="brand" value="${esc(p.brand)}" placeholder="Marca do produto"></div><div class="field"><label>Quantidade</label><input class="input" name="stock" type="number" step="1" required value="${Math.round(Number(p.stock)||0)}"></div><div class="field"><label>Data da compra do estoque</label><input class="input" name="purchaseDate" type="date" value="${esc(p.purchaseDate)}"></div><div class="field"><label>Unidade</label><select class="select" name="unit"><option ${p.unit==="unid"?"selected":""}>unid</option><option ${p.unit==="kg"?"selected":""}>kg</option><option ${p.unit==="g"?"selected":""}>g</option><option ${p.unit==="L"?"selected":""}>L</option><option ${p.unit==="cx"?"selected":""}>cx</option></select></div><div class="field"><label>Custo</label><input class="input" name="cost" type="number" step="0.01" value="${p.cost}"></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar produto</button></div></form>`)
 }
-function saveProduct(e,id){
-  e.preventDefault();const f=new FormData(e.target);
-  const existing=db.products.find(p=>p.id===id);
-  const obj={id:id||uid(),name:f.get("name"),cat:existing?.cat||"",brand:f.get("brand"),spec:f.get("spec"),stock:Math.round(Number(f.get("stock"))||0),purchaseDate:f.get("purchaseDate"),unit:f.get("unit"),cost:+f.get("cost"),min:existing?.min??1,finished:existing?.finished??false};
-  if(id) db.products=db.products.map(p=>p.id===id?{...obj,price:p.price}:p); else db.products.push({...obj,price:0});
-  closeModal();save();
-}
-function deleteProduct(id){
-  const product=db.products.find(item=>item.id===id);
-  if(!product) return;
-  askConfirmation("Excluir produto",`Tem certeza de que deseja excluir <b>${esc(product.name)}</b>?`,"Excluir produto",()=>{
-    db.products=db.products.filter(item=>item.id!==id);
-    save();
-  });
-}
+async function saveProduct(e,id){e.preventDefault();const f=new FormData(e.target),existing=db.products.find(p=>p.id===id),obj={id:id||uid(),name:f.get("name"),cat:existing?.cat||"",brand:f.get("brand"),spec:f.get("spec"),stock:Math.round(Number(f.get("stock"))||0),purchase_date:f.get("purchaseDate")||null,unit:f.get("unit"),cost:+f.get("cost")||0,price:existing?.price||0,min:existing?.min??1,finished:existing?.finished??false};try{await saveRow("products",obj);const local={...obj,purchaseDate:obj.purchase_date||""};if(id)db.products=db.products.map(p=>p.id===id?local:p);else db.products.push(local);closeModal();save();notify("Produto salvo.")}catch(e){notify("Erro ao salvar produto: "+e.message,true)}}
+async function deleteProduct(id){const product=db.products.find(item=>item.id===id);if(!product)return;askConfirmation("Excluir produto",`Tem certeza de que deseja excluir <b>${esc(product.name)}</b>?`,"Excluir produto",async()=>{try{await removeRow("products",id);db.products=db.products.filter(item=>item.id!==id);save();notify("Produto excluído.")}catch(e){notify("Erro ao excluir produto: "+e.message,true)}})}
+
 function openOrder(id){
   const o=db.orders.find(x=>x.id===id)||{id:"",date:today(),client:"",items:"",total:0,steps:{feito:true,pago:false,entregue:false}};
-  const orderRows = o.items ? String(o.items).split(" | ").map(item => {
-    const match = item.match(/^\s*(\d+)\s*x\s*(.*)$/i);
-    return {quantity:match ? match[1] : 1,name:match ? match[2].trim() : item.trim()};
-  }) : [{quantity:1,name:""}];
-  openModal(id?"Editar pedido":"Novo pedido",`
-  <form class="form" onsubmit="saveOrder(event,'${id||""}')">
-    <div class="field"><label>Data</label><input class="input" type="date" name="date" value="${o.date}" required></div>
-    <div class="field"><label>Cliente</label><input class="input" name="client" value="${esc(o.client)}" required></div>
-    <div class="field full">
-      <div class="order-item-head"><label>Qntd Itens</label><label>Item do pedido</label></div>
-      <div id="orderItemRows"></div>
-      <button type="button" class="btn secondary btn-add-item" onclick="addOrderItemRow()">Adicionar mais itens</button>
-    </div>
-    <div class="field full"><label>Esteira de status</label><div class="order-stage-selector">
-      <label><input type="checkbox" name="feito" ${o.steps.feito?"checked":""}> Feito</label>
-      <label><input type="checkbox" name="pago" ${o.steps.pago?"checked":""}> Pago</label>
-      <label><input type="checkbox" name="entregue" ${o.steps.entregue?"checked":""}> Entregue</label>
-    </div></div>
-    <div class="field"><label>Total do pedido</label><input class="input" type="number" step="0.01" name="total" value="${Number(o.total || 0).toFixed(2)}" readonly></div>
-    <div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar pedido</button></div>
-  </form>`);
-  orderRows.forEach(row => addOrderItemRow(row.quantity,row.name));
-  updateOrderTotal();
+  const orderRows=o.items?String(o.items).split(" | ").map(item=>{const m=item.match(/^\s*(\d+)\s*x\s*(.*)$/i);return {quantity:m?m[1]:1,name:m?m[2].trim():item.trim()}}):[{quantity:1,name:""}];
+  openModal(id?"Editar pedido":"Novo pedido",`<form class="form" onsubmit="saveOrder(event,'${id||""}')"><div class="field"><label>Data</label><input class="input" type="date" name="date" value="${o.date}" required></div><div class="field"><label>Cliente</label><input class="input" name="client" value="${esc(o.client)}" required></div><div class="field full"><div class="order-item-head"><label>Qntd Itens</label><label>Item do pedido</label></div><div id="orderItemRows"></div><button type="button" class="btn secondary btn-add-item" onclick="addOrderItemRow()">Adicionar mais itens</button></div><div class="field full"><label>Esteira de status</label><div class="order-stage-selector"><label><input type="checkbox" name="feito" ${o.steps.feito?"checked":""}> Feito</label><label><input type="checkbox" name="pago" ${o.steps.pago?"checked":""}> Pago</label><label><input type="checkbox" name="entregue" ${o.steps.entregue?"checked":""}> Entregue</label></div></div><div class="field"><label>Total do pedido</label><input class="input" type="number" step="0.01" name="total" value="${Number(o.total||0).toFixed(2)}" readonly></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar pedido</button></div></form>`);
+  orderRows.forEach(row=>addOrderItemRow(row.quantity,row.name));updateOrderTotal();
 }
-window.addOrderItemRow = function(quantity=1,selectedName=""){
-  const container = document.getElementById('orderItemRows');
-  if(!container) return;
-  const products = Array.isArray(db.configProducts) ? db.configProducts : [];
-  const options = products.map(item => `<option value="${esc(item.name)}" ${item.name===selectedName?"selected":""}>${esc(item.name)}</option>`).join("");
-  const legacyOption = selectedName && !products.some(item => item.name===selectedName) ? `<option value="${esc(selectedName)}" selected>${esc(selectedName)}</option>` : "";
-  const row = document.createElement('div');
-  row.className = 'order-item-row';
-  row.innerHTML = `<input class="input order-item-quantity" type="number" min="1" step="1" value="${esc(quantity)}" aria-label="Qntd Itens" oninput="updateOrderTotal()">
-    <select class="select" aria-label="Item do pedido" onchange="updateOrderTotal()"><option value="">Selecione um produto</option>${options}${legacyOption}</select>`;
-  container.appendChild(row);
-  updateOrderTotal();
+window.addOrderItemRow=function(quantity=1,selectedName=""){
+  const container=document.getElementById("orderItemRows");if(!container)return;const products=Array.isArray(db.configProducts)?db.configProducts:[];const options=products.map(item=>`<option value="${esc(item.name)}" ${item.name===selectedName?"selected":""}>${esc(item.name)}</option>`).join("");const legacyOption=selectedName&&!products.some(item=>item.name===selectedName)?`<option value="${esc(selectedName)}" selected>${esc(selectedName)}</option>`:"";const row=document.createElement("div");row.className="order-item-row";row.innerHTML=`<input class="input order-item-quantity" type="number" min="1" step="1" value="${esc(quantity)}" aria-label="Qntd Itens" oninput="updateOrderTotal()"><select class="select" aria-label="Item do pedido" onchange="updateOrderTotal()"><option value="">Selecione um produto</option>${options}${legacyOption}</select>`;container.appendChild(row);updateOrderTotal()
 };
-window.updateOrderTotal = function(){
-  const total = [...document.querySelectorAll('#orderItemRows .order-item-row')].reduce((sum,row)=>{
-    const quantity = Math.max(1,Number(row.querySelector('input').value) || 1);
-    const name = row.querySelector('select').value;
-    const product = db.configProducts.find(item=>item.name===name);
-    return sum + quantity * (product ? Number(product.price) || 0 : 0);
-  },0);
-  const totalInput = document.querySelector('#modalBody input[name="total"]');
-  if(totalInput) totalInput.value = total.toFixed(2);
-};
-function saveOrder(e,id){
-  e.preventDefault();const f=new FormData(e.target);
-  const itemsRaw = [...document.querySelectorAll('#orderItemRows .order-item-row')].map(row=>{
-    const quantity = Math.max(1,parseInt(row.querySelector('input').value,10)||1);
-    const name = row.querySelector('select').value;
-    return name ? `${quantity}x ${name}` : '';
-  }).filter(Boolean).join(' | ');
-  const obj={id:id||uid(),date:f.get("date"),client:f.get("client"),items:itemsRaw,total:+f.get("total"),steps:{feito:f.has("feito"),pago:f.has("pago"),entregue:f.has("entregue")}};
-  if(id) db.orders=db.orders.map(o=>o.id===id?obj:o); else db.orders.push(obj);
-  closeModal();save();
-}
-function deleteOrder(id){
-  const order=db.orders.find(item=>item.id===id);
-  if(!order) return;
-  askConfirmation("Excluir pedido",`Tem certeza de que deseja excluir o pedido <b>#${esc(id.slice(-5).toUpperCase())}</b>?`,"Excluir pedido",()=>{
-    db.orders=db.orders.filter(item=>item.id!==id);
-    save();
-  });
-}
-function openCash(){
-  openModal("Novo lançamento",`
-  <form class="form" onsubmit="saveCash(event)">
-    <div class="field"><label>Data</label><input class="input" type="date" name="date" value="${today()}" required></div>
-    <div class="field"><label>Tipo</label><select class="select" name="type"><option>Entrada</option><option>Saída</option></select></div>
-    <div class="field full"><label>Descrição</label><input class="input" name="desc" required placeholder="Ex.: Venda de doces / Compra de ingredientes"></div>
-    <div class="field"><label>Categoria</label><input class="input" name="cat" value="Vendas" required></div>
-    <div class="field"><label>Forma de pagamento</label><select class="select" name="method"><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Transferência</option><option>Boleto</option></select></div>
-    <div class="field"><label>Valor</label><input class="input" type="number" step="0.01" name="value" required></div>
-    <div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar lançamento</button></div>
-  </form>`);
-}
-function saveCash(e){
-  e.preventDefault();const f=new FormData(e.target);
-  db.cash.push({id:uid(),date:f.get("date"),type:f.get("type"),desc:f.get("desc"),cat:f.get("cat"),method:f.get("method"),value:+f.get("value")});
-  closeModal();save();
-}
-function deleteCash(id){
-  const entry=db.cash.find(item=>item.id===id);
-  if(!entry) return;
-  askConfirmation("Excluir lançamento",`Tem certeza de que deseja excluir <b>${esc(entry.desc)}</b>?`,"Excluir lançamento",()=>{
-    db.cash=db.cash.filter(item=>item.id!==id);
-    save();
-  });
-}
-function openQuick(){
-  openModal("O que deseja cadastrar?",`
-  <div style="padding:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-    <button class="btn" onclick="closeModal();openProduct()">📦<br>Novo produto</button>
-    <button class="btn" onclick="closeModal();openOrder()">🧁<br>Novo pedido</button>
-    <button class="btn" onclick="closeModal();openCash()">💰<br>Novo caixa</button>
-  </div>`);
-}
-function addConfigProduct(name,price,monthFilter="all"){
-  const value = String(name || "").trim();
-  if(!value) return;
-  db.configProducts = Array.isArray(db.configProducts) ? db.configProducts : [];
-  const month = monthFilter && monthFilter !== "all" ? monthFilter : today().slice(0,7);
-  if(!db.configProducts.some(item=>item.name===value && item.month===month)) db.configProducts.push({name:value,price:Number(price)||0,month});
-  save();
-  openSettings(monthFilter);
-}
-function saveConfigProductPrice(index,price){
-  const product = db.configProducts[index];
-  if(!product) return;
-  product.price = Math.max(0,Number(price)||0);
-  save();
-}
-function removeConfigProduct(index,monthFilter="all"){
-  db.configProducts = (db.configProducts || []).filter((item,itemIndex) => itemIndex !== index);
-  save();
-  openSettings(monthFilter);
-}
+window.updateOrderTotal=function(){const total=[...document.querySelectorAll("#orderItemRows .order-item-row")].reduce((sum,row)=>{const q=Math.max(1,Number(row.querySelector("input").value)||1),name=row.querySelector("select").value,product=db.configProducts.find(item=>item.name===name);return sum+q*(product?Number(product.price)||0:0)},0);const input=document.querySelector('#modalBody input[name="total"]');if(input)input.value=total.toFixed(2)};
+async function saveOrder(e,id){e.preventDefault();const f=new FormData(e.target);const itemsRaw=[...document.querySelectorAll("#orderItemRows .order-item-row")].map(row=>{const q=Math.max(1,parseInt(row.querySelector("input").value,10)||1),name=row.querySelector("select").value;return name?`${q}x ${name}`:""}).filter(Boolean).join(" | ");const obj={id:id||uid(),date:f.get("date"),client:f.get("client"),items:itemsRaw,total:+f.get("total")||0,payment:"",feito:f.has("feito"),pago:f.has("pago"),entregue:f.has("entregue")};try{await saveRow("orders",obj);const local={id:obj.id,date:obj.date,client:obj.client,items:obj.items,total:obj.total,payment:"",steps:{feito:obj.feito,pago:obj.pago,entregue:obj.entregue}};if(id)db.orders=db.orders.map(o=>o.id===id?local:o);else db.orders.push(local);closeModal();save();notify("Pedido salvo.")}catch(e){notify("Erro ao salvar pedido: "+e.message,true)}}
+async function deleteOrder(id){const order=db.orders.find(item=>item.id===id);if(!order)return;askConfirmation("Excluir pedido",`Tem certeza de que deseja excluir o pedido <b>#${esc(id.slice(-5).toUpperCase())}</b>?`,"Excluir pedido",async()=>{try{await removeRow("orders",id);db.orders=db.orders.filter(item=>item.id!==id);save();notify("Pedido excluído.")}catch(e){notify("Erro ao excluir pedido: "+e.message,true)}})}
+
+function openCash(){openModal("Novo lançamento",`<form class="form" onsubmit="saveCash(event)"><div class="field"><label>Data</label><input class="input" type="date" name="date" value="${today()}" required></div><div class="field"><label>Tipo</label><select class="select" name="type"><option>Entrada</option><option>Saída</option></select></div><div class="field full"><label>Descrição</label><input class="input" name="desc" required placeholder="Ex.: Venda de doces / Compra de ingredientes"></div><div class="field"><label>Categoria</label><input class="input" name="cat" value="Vendas" required></div><div class="field"><label>Forma de pagamento</label><select class="select" name="method"><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Transferência</option><option>Boleto</option></select></div><div class="field"><label>Valor</label><input class="input" type="number" step="0.01" name="value" required></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar lançamento</button></div></form>`)}
+async function saveCash(e){e.preventDefault();const f=new FormData(e.target),obj={id:uid(),date:f.get("date"),type:f.get("type"),desc:f.get("desc"),cat:f.get("cat"),method:f.get("method"),value:+f.get("value")||0};try{await saveRow("cash",obj);db.cash.push(obj);closeModal();save();notify("Lançamento salvo.")}catch(e){notify("Erro ao salvar lançamento: "+e.message,true)}}
+async function deleteCash(id){const entry=db.cash.find(item=>item.id===id);if(!entry)return;askConfirmation("Excluir lançamento",`Tem certeza de que deseja excluir <b>${esc(entry.desc)}</b>?`,"Excluir lançamento",async()=>{try{await removeRow("cash",id);db.cash=db.cash.filter(item=>item.id!==id);save();notify("Lançamento excluído.")}catch(e){notify("Erro ao excluir lançamento: "+e.message,true)}})}
+function openQuick(){openModal("O que deseja cadastrar?",`<div style="padding:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px"><button class="btn" onclick="closeModal();openProduct()">📦<br>Novo produto</button><button class="btn" onclick="closeModal();openOrder()">🧁<br>Novo pedido</button><button class="btn" onclick="closeModal();openCash()">💰<br>Novo caixa</button></div>`)}
+
+async function addConfigProduct(name,price,monthFilter="all"){
+  const value=String(name||"").trim();if(!value)return;const month=monthFilter&&monthFilter!=="all"?monthFilter:today().slice(0,7);if(db.configProducts.some(item=>item.name===value&&item.month===month))return;const row={id:uid(),name:value,price:Number(price)||0,month};try{await saveRow("config_products",row);db.configProducts.push(row);openSettings(monthFilter);notify("Produto de pedido adicionado.")}catch(e){notify("Erro ao adicionar produto: "+e.message,true)}}
+async function saveConfigProductPrice(index,price){const product=db.configProducts[index];if(!product)return;product.price=Math.max(0,Number(price)||0);try{await saveRow("config_products",product);refreshAll();notify("Preço atualizado.")}catch(e){notify("Erro ao atualizar preço: "+e.message,true)}}
+async function removeConfigProduct(index,monthFilter="all"){const product=db.configProducts[index];if(!product)return;try{await removeRow("config_products",product.id);db.configProducts=db.configProducts.filter(item=>item.id!==product.id);openSettings(monthFilter);notify("Produto removido.")}catch(e){notify("Erro ao remover produto: "+e.message,true)}}
 function openSettings(monthFilter="all"){
-  const months = [...new Set([today().slice(0,7),...(db.configProducts || []).map(item=>item.month)])].filter(Boolean).sort().reverse();
-  const monthLabel = month => new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
-  const visibleProducts = (db.configProducts || []).map((item,index)=>({...item,index})).filter(item=>monthFilter==="all" || item.month===monthFilter);
-  openModal("Configurações",`
-    <div class="config-layout">
-      <div class="config-panel">
-        <div class="field" style="margin-bottom:12px">
-          <label for="settingsMonth">Filtrar por mês</label>
-          <select class="select" id="settingsMonth" onchange="openSettings(this.value)">
-            <option value="all" ${monthFilter==="all"?"selected":""}>Todos os meses</option>
-            ${months.map(month=>`<option value="${month}" ${monthFilter===month?"selected":""}>${monthLabel(month)}</option>`).join("")}
-          </select>
-        </div>
-        <div class="config-header">
-          <h3>Produtos Cadastrados</h3>
-        </div>
-        <form onsubmit="event.preventDefault(); addConfigProduct(this.name.value,this.price.value,document.getElementById('settingsMonth').value); this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-          <input class="input" name="name" placeholder="Ex.: Cone Doce de Leite" style="flex:1;min-width:180px">
-          <input class="input" name="price" type="number" min="0" step="0.01" placeholder="Preço R$" aria-label="Preço do produto" style="width:115px">
-          <button class="btn small" type="submit">+ Adicionar</button>
-        </form>
-        <div class="config-list">
-          ${visibleProducts.length ? visibleProducts.map(item => `
-            <div class="config-item">
-              <div>
-                <strong>${esc(item.name)}</strong>
-              </div>
-              <div class="config-actions">
-                <input class="input" type="number" min="0" step="0.01" value="${Number(item.price)||0}" aria-label="Preço de ${esc(item.name)}" onchange="saveConfigProductPrice(${item.index},this.value)" style="width:105px;padding:6px 8px">
-                <button class="btn small" onclick="removeConfigProduct(${item.index},'${monthFilter}');">Excluir</button>
-              </div>
-            </div>
-          `).join("") : `<div class="empty">Nenhum produto neste mês.</div>`}
-        </div>
-      </div>
-    </div>
-  `);
+  const months=[...new Set([today().slice(0,7),...(db.configProducts||[]).map(item=>item.month)])].filter(Boolean).sort().reverse();const monthText=month=>new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"});const visible=(db.configProducts||[]).map((item,index)=>({...item,index})).filter(item=>monthFilter==="all"||item.month===monthFilter);
+  openModal("Configurações",`<div class="config-layout"><div class="config-panel"><div class="field" style="margin-bottom:12px"><label for="settingsMonth">Filtrar por mês</label><select class="select" id="settingsMonth" onchange="openSettings(this.value)"><option value="all" ${monthFilter==="all"?"selected":""}>Todos os meses</option>${months.map(month=>`<option value="${month}" ${monthFilter===month?"selected":""}>${monthText(month)}</option>`).join("")}</select></div><div class="config-header"><h3>Produtos Cadastrados</h3></div><form onsubmit="event.preventDefault(); addConfigProduct(this.name.value,this.price.value,document.getElementById('settingsMonth').value); this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><input class="input" name="name" placeholder="Ex.: Cone Doce de Leite" style="flex:1;min-width:180px"><input class="input" name="price" type="number" min="0" step="0.01" placeholder="Preço R$" aria-label="Preço do produto" style="width:115px"><button class="btn small" type="submit">+ Adicionar</button></form><div class="config-list">${visible.length?visible.map(item=>`<div class="config-item"><div><strong>${esc(item.name)}</strong></div><div class="config-actions"><input class="input" type="number" min="0" step="0.01" value="${Number(item.price)||0}" aria-label="Preço de ${esc(item.name)}" onchange="saveConfigProductPrice(${item.index},this.value)" style="width:105px;padding:6px 8px"><button class="btn small" onclick="removeConfigProduct(${item.index},'${monthFilter}')">Excluir</button></div></div>`).join(""): `<div class="empty">Nenhum produto neste mês.</div>`}</div></div></div>`)
 }
-function exportData(){
-  const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="backup-doce-gestao.json";a.click();URL.revokeObjectURL(a.href);
-}
-document.querySelectorAll(".nav button").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
-    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-    btn.classList.add("active");document.getElementById(btn.dataset.section).classList.add("active");
-    refreshAll();
-  });
-});
-monthLabel();refreshAll();
+function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="backup-doce-gestao.json";a.click();URL.revokeObjectURL(a.href)}
+
+document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));btn.classList.add("active");document.getElementById(btn.dataset.section).classList.add("active");refreshAll()}));
+monthLabel();refreshAll();loadDb();
 </script>
 </body>
 </html>
