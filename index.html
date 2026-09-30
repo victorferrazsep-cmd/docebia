@@ -70,11 +70,15 @@ button{cursor:pointer}
 .config-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
 .config-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
 .config-header h3{margin:0;font-size:15px;color:var(--brown)}
+.settings-toggle{display:grid;width:30px;height:30px;place-items:center;padding:0;border:0;border-radius:6px;background:#f3e3e6;color:#82435a;font-size:16px;font-weight:900}
+.config-topic-body[hidden]{display:none}
 .config-list{display:grid;gap:10px;max-height:380px;overflow:auto}
 .config-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border:1px solid #f1d9df;border-radius:10px;background:#fff9fb}
 .config-item strong{display:block;color:var(--brown)}
 .config-item small{color:var(--muted)}
 .config-actions{display:flex;gap:8px;flex-wrap:wrap}
+.config-type-amount{width:100px;padding:6px 8px}
+.config-type-unit{width:72px;padding:6px 8px}
 
 .nav{
   display:flex;gap:7px;align-items:center;margin:5px 0 13px;
@@ -201,6 +205,7 @@ tbody tr:hover{background:#f8d4df}
 .field{display:flex;flex-direction:column;gap:5px}
 .field.full{grid-column:1/-1}
 .field label{font-size:11px;font-weight:800;color:#744632}
+.field-label{font-size:11px;font-weight:800;color:#744632}
 .field-inline{display:grid;grid-template-columns:1.5fr .7fr;gap:8px;align-items:end}
 .field-inline .field{margin:0}
 .field-compact{padding:8px 10px;border:1px solid #e8cbd4;background:#fffafa;border-radius:8px;color:var(--text);font-weight:700;min-height:38px;display:flex;align-items:center;justify-content:center}
@@ -263,22 +268,46 @@ tbody tr:hover{background:#f8d4df}
 #estoque .table-wrap{overflow-x:hidden}
 #estoque table{width:100%;min-width:0;table-layout:fixed}
 #estoque th,#estoque td{text-align:center;padding:6px 4px;font-size:10px;white-space:normal;overflow-wrap:anywhere}
-#estoque th:nth-child(1){width:15%}
-#estoque th:nth-child(2){width:17%}
-#estoque th:nth-child(3){width:13%}
-#estoque th:nth-child(4){width:8%}
-#estoque th:nth-child(5){width:7%}
-#estoque th:nth-child(6){width:14%}
-#estoque th:nth-child(7){width:14%}
-#estoque th:nth-child(8){width:12%}
+#estoque th:nth-child(1){width:11%}
+#estoque th:nth-child(2){width:12%}
+#estoque th:nth-child(3){width:17%}
+#estoque th:nth-child(4){width:12%}
+#estoque th:nth-child(5){width:10%}
+#estoque th:nth-child(6){width:7%}
+#estoque th:nth-child(7){width:12%}
+#estoque th:nth-child(8){width:10%}
+#estoque th:nth-child(9){width:9%}
 #estoque .stock-actions{display:flex;justify-content:center;gap:5px}
-#estoque td:nth-child(7){padding-left:0;padding-right:0}
+#estoque td:nth-child(8){padding-left:0;padding-right:0}
 #estoque .stock-finished-cell{padding-left:2px;padding-right:2px}
 #estoque .stock-finished-control{display:flex;flex-direction:column;align-items:center;gap:3px}
 #estoque .stock-finished-control input{width:13px;height:13px;margin:0;accent-color:var(--pink-dark)}
 #estoque .order-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:14px;min-width:14px;padding:1px 0;margin:0;font-size:9px}
 
 .two-col{display:grid;grid-template-columns:1.4fr .8fr;gap:13px}
+.cash-panel-controls{display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px}
+.cash-movements-hidden{display:none}
+.report-month-years{display:grid;gap:5px;max-height:220px;overflow-y:auto}
+.report-month-year{border:1px solid var(--line);border-radius:7px;background:#fff}
+.report-month-year summary{padding:8px 10px;color:var(--brown);font-size:12px;font-weight:800;cursor:pointer}
+.report-month-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:6px;padding:0 7px 7px}
+.report-month-option{display:flex;align-items:center;gap:7px;min-width:0;padding:7px 8px;border:1px solid var(--line);border-radius:7px;background:#fff9fb;color:var(--brown);font-size:11px;font-weight:700}
+.report-month-option input{margin:0;accent-color:var(--pink-dark)}
+#caixa .table-wrap{overflow-x:hidden}
+#caixa table{width:100%;min-width:0;table-layout:fixed}
+#caixa th,#caixa td{padding:6px 4px;font-size:10px;white-space:normal;overflow-wrap:anywhere}
+#caixa th:nth-child(1){width:17%}
+#caixa th:nth-child(2){width:15%}
+#caixa th:nth-child(3){width:20%}
+#caixa th:nth-child(4){width:15%}
+#caixa th:nth-child(5){width:15%}
+#caixa th:nth-child(6){width:18%}
+.cash-row-actions{display:inline-flex;align-items:center;justify-content:center;gap:4px;margin-left:8px;vertical-align:middle}
+.cash-row-actions .cash-edit{background:#f3e3e6;color:#82435a}
+.cash-row-actions .cash-delete{background:#fff0ef;color:#a33f4a}
+.cash-row-actions button{width:20px;height:24px;padding:0;font-size:11px;flex:0 0 auto}
+.cash-value{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+#modalBody select[name="unit"] option:first-child{text-transform:capitalize}
 .legend{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px}
 .dre-statement{padding:18px}
 .dre-period{margin:0 12px 12px;color:var(--muted);font-size:11px}
@@ -344,7 +373,7 @@ tbody tr:hover{background:#f8d4df}
         <small>Gestão & Fluxo de Caixa</small>
       </div>
     </div>
-    <div class="month">MÊS: <span id="monthName">SETEMBRO</span></div>
+    <div class="month">PERÍODO: <span id="monthName">SETEMBRO</span></div>
     <div class="top-actions">
       <button class="icon-btn" title="Configurações" onclick="openSettings()">⚙️</button>
       <button class="icon-btn active" title="Novo lançamento" onclick="openQuick()">🏷️</button>
@@ -379,21 +408,21 @@ tbody tr:hover{background:#f8d4df}
 
     <section id="estoque" class="section">
       <div class="kpis stock-kpis">
-        <div class="kpi"><div class="title">Produtos ativos</div><div class="value" id="stockCount">0</div><div class="sub">produtos no estoque</div></div>
-        <div class="kpi"><div class="title">Valor do estoque</div><div class="value" id="stockValue">R$ 0,00</div><div class="sub">itens em estoque</div></div>
+        <div class="kpi"><div class="title">Produtos ativos</div><div class="value" id="stockCount">0</div><div class="sub">Produtos no estoque</div></div>
+        <div class="kpi"><div class="title">Valor do estoque</div><div class="value" id="stockValue">R$ 0,00</div><div class="sub">Itens em estoque</div></div>
       </div>
       <div class="panel">
         <div class="panel-title">CONTROLE DE ESTOQUE</div>
         <div class="toolbar">
           <div class="filters">
             <input class="input" id="stockSearch" placeholder="🔎 Produto ou categoria..." oninput="renderStock()">
-            <select class="select" id="stockFilter" onchange="renderStock()"><option value="">Todos os status</option><option value="ok">Normal</option><option value="low">Estoque baixo</option><option value="zero">Sem estoque</option></select>
+            <select class="select" id="stockFilter" onchange="renderStock()"><option value="">Todos os status</option><option value="ok">Normal</option><option value="zero">Sem estoque</option></select>
           </div>
           <button class="btn" onclick="openProduct()">+ Cadastrar produto</button>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Produto</th><th>Especificações</th><th>Marca</th><th>Estoque</th><th>Unid.</th><th>Custo</th><th>Ações</th><th>Acabou</th></tr></thead>
+            <thead><tr><th>Produto</th><th>Tipo</th><th>Especificações</th><th>Marca</th><th>Estoque Entrada</th><th>Unid.</th><th>Custo</th><th>Ações</th><th>Acabou</th></tr></thead>
             <tbody id="stockTable"></tbody>
           </table>
         </div>
@@ -422,16 +451,35 @@ tbody tr:hover{background:#f8d4df}
 
     <section id="caixa" class="section">
       <div class="kpis">
-        <div class="kpi"><div class="title">Entradas</div><div class="value cash-positive" id="cashIn">R$ 0,00</div><div class="sub">recebimentos</div></div>
-        <div class="kpi"><div class="title">Saídas</div><div class="value cash-negative" id="cashOut">R$ 0,00</div><div class="sub">despesas</div></div>
-        <div class="kpi"><div class="title">Saldo</div><div class="value" id="cashBalance">R$ 0,00</div><div class="sub">resultado acumulado</div></div>
-        <div class="kpi"><div class="title">Lançamentos</div><div class="value" id="cashCount">0</div><div class="sub">movimentações</div></div>
+        <div class="kpi"><div class="title">Entradas</div><div class="value cash-positive" id="cashIn">R$ 0,00</div><div class="sub">Recebimentos</div></div>
+        <div class="kpi"><div class="title">Saídas</div><div class="value cash-negative" id="cashOut">R$ 0,00</div><div class="sub">Despesas</div></div>
+        <div class="kpi"><div class="title">Saldo</div><div class="value" id="cashBalance">R$ 0,00</div><div class="sub">Resultado acumulado</div></div>
+        <div class="kpi"><div class="title">Lançamentos</div><div class="value" id="cashCount">0</div><div class="sub">Movimentações</div></div>
       </div>
-      <div class="cash-actions"><button class="btn" onclick="openCash()">+ Lançamento</button></div>
+      <div class="cash-panel-controls">
+        <button class="btn" onclick="openCash()">+ Lançamento</button>
+        <button class="btn secondary" id="toggleCashPanelButton" type="button" aria-label="Mostrar Movimentações" title="Mostrar Movimentações" aria-expanded="false" aria-controls="cashMovementsPanel" onclick="toggleCashPanel()">⌄</button>
+      </div>
+      <div class="panel cash-movements-hidden" id="cashMovementsPanel">
+        <div class="panel-title">MOVIMENTAÇÕES</div>
+        <div class="toolbar">
+          <div class="filters">
+            <input class="input" id="cashSearch" placeholder="🔎 Buscar..." oninput="renderCash()">
+            <select class="select" id="cashFilter" onchange="renderCash()"><option value="">Todos</option><option value="Entrada">Entradas</option><option value="Saída">Saídas</option></select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Forma</th><th>Valor</th></tr></thead>
+            <tbody id="cashTable"></tbody>
+          </table>
+        </div>
+      </div>
       <div class="panel">
           <div class="panel-title">DRE SIMPLIFICADA</div>
           <div class="dre-statement">
-            <p class="dre-period">Valores acumulados · regime de caixa</p>
+            <p class="dre-period" id="drePeriod">Regime de caixa</p>
+            <div class="dre-row"><span>Saldo inicial (mês anterior)</span><strong id="dreOpeningBalance">R$ 0,00</strong></div>
             <div class="dre-row"><span>Entradas do caixa</span><strong class="cash-positive" id="dreCashIncome">R$ 0,00</strong></div>
             <div class="dre-row"><span>Entradas de pedidos pagos</span><strong class="cash-positive" id="dreOrderIncome">R$ 0,00</strong></div>
             <div class="dre-row dre-subtotal"><span>Total de entradas</span><strong class="cash-positive" id="cashIn2">R$ 0,00</strong></div>
@@ -440,7 +488,8 @@ tbody tr:hover{background:#f8d4df}
             <div class="dre-row dre-subtotal"><span>Total de despesas</span><strong class="cash-negative" id="cashOut2">R$ 0,00</strong></div>
             <div class="dre-row"><span>Resultado antes do retorno</span><strong id="dreBeforeReturn">R$ 0,00</strong></div>
             <div class="dre-row"><span id="dreReturnLabel">Retorno ao caixa (40%)</span><strong class="cash-negative" id="dreCashReturn">R$ 0,00</strong></div>
-            <div class="dre-row dre-result"><span>Resultado líquido</span><strong id="cashBalance2">R$ 0,00</strong></div>
+            <div class="dre-row dre-subtotal"><span>Resultado líquido do mês</span><strong id="cashBalance2">R$ 0,00</strong></div>
+            <div class="dre-row dre-result"><span>Saldo final (levado ao próximo mês)</span><strong id="dreClosingBalance">R$ 0,00</strong></div>
             <p class="dre-note">Entradas incluem lançamentos do caixa e pedidos pagos; despesas incluem saídas do caixa e custos cadastrados no estoque.</p>
             <button class="btn" style="width:100%;margin-top:16px" onclick="exportDrePdf()">📄 Exportar DRE em PDF</button>
             <button class="btn secondary" style="width:100%;margin-top:8px" onclick="exportData()">☁️ Exportar backup</button>
@@ -467,6 +516,10 @@ const SUPABASE_ANON_KEY = "sb_publishable_0m5jb1WEkjJcMk-WxfRd-w_M0mRmo8T";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const KEY="doceGestao_v1";
 const CASH_RETURN_KEY=KEY+"_cash_return_percent";
+const REPORT_MONTH_KEY=KEY+"_report_month";
+const REPORT_MONTHS_KEY=KEY+"_report_months";
+const PRODUCT_TYPES_KEY=KEY+"_product_types";
+const PRODUCT_TYPE_USAGE_KEY=KEY+"_product_type_usage";
 const brl = v => Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const today = () => new Date().toISOString().slice(0,10);
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -476,12 +529,120 @@ let db = {configProducts:[], products:[], orders:[], cash:[]};
 let loading = true;
 let confirmationAction = null;
 
+function normalizeCashType(value){
+  const raw=String(value ?? "").trim();
+  const normalized=raw.toLowerCase();
+  if(["entrada","entradas","in","receita","recebimento","recebimentos"].includes(normalized)) return "Entrada";
+  if(["saida","saídas","saída","out","despesa","despesas","gasto","gastos"].includes(normalized)) return "Saída";
+  return raw || "Entrada";
+}
+function getCashDescription(row){
+  return String(row?.desc ?? row?.description ?? row?.descricao ?? "").trim();
+}
+function cashRowToLocal(row){
+  return {
+    id: row.id,
+    date: row.date,
+    type: normalizeCashType(row.type),
+    desc: getCashDescription(row),
+    cat: row.cat ?? row.category ?? row.categoria ?? "",
+    method: row.method ?? row.forma ?? "",
+    value: Number(row.value) || 0
+  };
+}
+function cashRowToDb(row){
+  return {
+    id: row.id,
+    date: row.date,
+    type: normalizeCashType(row.type),
+    description: getCashDescription(row),
+    cat: row.cat ?? row.category ?? row.categoria ?? "",
+    method: row.method ?? row.forma ?? "",
+    value: Number(row.value) || 0
+  };
+}
+
 function money(v){return brl(v)}
 function getCashReturnPercent(){const stored=localStorage.getItem(CASH_RETURN_KEY);if(stored===null)return 40;const percent=Number(stored);return Number.isFinite(percent)&&percent>=0&&percent<=100?percent:40}
+function validReportMonth(value){return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(value||""))}
+function getSelectedReportMonths(){
+  const stored=localStorage.getItem(REPORT_MONTHS_KEY);
+  if(stored!==null){try{return [...new Set(JSON.parse(stored).filter(validReportMonth))].sort()}catch{return []}}
+  const legacy=localStorage.getItem(REPORT_MONTH_KEY);
+  return [validReportMonth(legacy)?legacy:today().slice(0,7)];
+}
+function getReportMonths(){
+  const selected=getSelectedReportMonths(),current=today().slice(0,7);
+  const available=[current,selected,...db.cash.map(item=>item.date),...db.orders.map(item=>item.date),...db.products.map(item=>item.purchaseDate)]
+    .map(value=>String(value||"").slice(0,7)).filter(value=>/^\d{4}-(0[1-9]|1[0-2])$/.test(value));
+  const first=available.reduce((min,value)=>value<min?value:min),last=available.reduce((max,value)=>value>max?value:max);
+  const [startYear,startMonth]=first.split("-").map(Number),[endYear,endMonth]=last.split("-").map(Number);
+  const startIndex=startYear*12+startMonth-1,endIndex=endYear*12+endMonth-1,months=[];
+  for(let index=startIndex;index<=endIndex;index++) months.push(`${Math.floor(index/12)}-${String(index%12+1).padStart(2,"0")}`);
+  return months.reverse();
+}
+function monthOf(date){return String(date||"").slice(0,7)}
+function setReportMonths(){
+  const selected=[...document.querySelectorAll("#reportMonthOptions input:checked")].map(input=>input.value).filter(validReportMonth);
+  localStorage.setItem(REPORT_MONTHS_KEY,JSON.stringify([...new Set(selected)].sort()));
+  monthLabel();
+  refreshAll();
+}
+function getProductTypes(){
+  const stored=localStorage.getItem(PRODUCT_TYPES_KEY);
+  let types;
+  if(stored===null) types=db.products.map(product=>product.cat);
+  else{try{types=JSON.parse(stored)}catch{return []}}
+  return [...new Set((Array.isArray(types)?types:[]).map(type=>String(type||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+}
+function addProductType(value){
+  const type=String(value||"").trim();
+  if(!type)return;
+  const types=getProductTypes();
+  if(types.some(item=>item.toLocaleLowerCase("pt-BR")===type.toLocaleLowerCase("pt-BR"))){notify("Esse tipo já está cadastrado.",true);return}
+  localStorage.setItem(PRODUCT_TYPES_KEY,JSON.stringify([...types,type].sort((a,b)=>a.localeCompare(b,"pt-BR"))));
+  openSettings();notify("Tipo cadastrado.");
+}
+function getProductTypeUsage(type){
+  try{
+    const usage=JSON.parse(localStorage.getItem(PRODUCT_TYPE_USAGE_KEY)||"{}");
+    const value=usage[type];
+    if(value===undefined||value===null||value==="")return {quantity:"",unit:"unid"};
+    if(typeof value==="number")return {quantity:Number.isFinite(value)?value:"",unit:"unid"};
+    const quantity=Number(value.quantity);
+    return {quantity:Number.isFinite(quantity)?quantity:"",unit:value.unit==="g"?"g":"unid"};
+  }catch{return {quantity:"",unit:"unid"}}
+}
+function saveProductTypeUsage(index,value,unit){
+  const type=getProductTypes()[index];
+  if(!type)return;
+  const amount=String(value).trim()===""?null:Number(value);
+  if(amount!==null&&(!Number.isFinite(amount)||amount<0)){notify("Informe um valor positivo ou zero.",true);return}
+  let usage={};
+  try{usage=JSON.parse(localStorage.getItem(PRODUCT_TYPE_USAGE_KEY)||"{}")}catch{}
+  if(amount===null)delete usage[type];else usage[type]={quantity:amount,unit:unit==="g"?"g":"unid"};
+  localStorage.setItem(PRODUCT_TYPE_USAGE_KEY,JSON.stringify(usage));
+}
+function removeProductType(index){
+  const types=getProductTypes();
+  if(!types[index])return;
+  const [removedType]=types.splice(index,1);
+  localStorage.setItem(PRODUCT_TYPES_KEY,JSON.stringify(types));
+  let usage={};
+  try{usage=JSON.parse(localStorage.getItem(PRODUCT_TYPE_USAGE_KEY)||"{}")}catch{}
+  delete usage[removedType];
+  localStorage.setItem(PRODUCT_TYPE_USAGE_KEY,JSON.stringify(usage));
+  openSettings();notify("Tipo removido.");
+}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function formatDate(d){return d?new Date(d+"T12:00:00").toLocaleDateString("pt-BR"):""}
-function monthLabel(){document.getElementById("monthName").textContent=new Date().toLocaleDateString("pt-BR",{month:"long"}).toUpperCase()}
-function statusProduct(p){if(p.stock<=0)return ["danger","Sem estoque"];if(p.stock<=p.min)return ["warn","Estoque baixo"];return ["ok","Normal"]}
+function monthLabel(){
+  const months=getSelectedReportMonths();
+  document.getElementById("monthName").textContent=months.length===1
+    ?new Date(`${months[0]}-01T12:00:00`).toLocaleDateString("pt-BR",{month:"long",year:"numeric"}).toUpperCase()
+    :months.length?`${months.length} MESES SELECIONADOS`:"NENHUM MÊS";
+}
+function statusProduct(p){if(p.stock<=0)return ["zero","Sem estoque"];return ["ok","Normal"]}
 function notify(message,error=false){
   console[error?"error":"log"](message);
   const old=document.getElementById("dbStatus"); if(old) old.remove();
@@ -504,9 +665,9 @@ async function loadDb(){
       selectTable("config_products"),selectTable("products"),selectTable("orders"),selectTable("cash")
     ]);
     db.configProducts=configProducts.map(x=>({name:String(x.name||""),price:Number(x.price)||0,month:x.month||today().slice(0,7),id:x.id}));
-    db.products=products.map(x=>({...x,stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min)||1,purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
+    db.products=products.map(x=>({...x,stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min??1),purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
     db.orders=orders.map(x=>({id:x.id,date:x.date,client:x.client,items:x.items||"",total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
-    db.cash=cash.map(x=>({id:x.id,date:x.date,type:x.type,desc:x.desc,cat:x.cat,method:x.method,value:Number(x.value)||0}));
+    db.cash=cash.map(cashRowToLocal);
     await migrateLegacyLocalStorageIfNeeded();
     loading=false; refreshAll();
   }catch(error){
@@ -521,9 +682,9 @@ async function migrateLegacyLocalStorageIfNeeded(){
   const empty=!db.products.length&&!db.orders.length&&!db.cash.length&&!db.configProducts.length;
   if(!empty) return;
   const config=(old.configProducts||[]).map(item=>typeof item==="string"?{id:uid(),name:item,price:0,month:today().slice(0,7)}:{id:item.id||uid(),name:String(item.name||""),price:Number(item.price)||0,month:item.month||today().slice(0,7)});
-  const products=(old.products||[]).map(p=>({id:p.id||uid(),name:p.name||"",cat:p.cat||"",brand:p.brand||"",spec:p.spec||"",stock:Number(p.stock)||0,unit:p.unit||"unid",cost:Number(p.cost)||0,price:Number(p.price)||0,min:Number(p.min)||1,purchase_date:p.purchaseDate||null,finished:Boolean(p.finished)}));
+  const products=(old.products||[]).map(p=>({id:p.id||uid(),name:p.name||"",cat:p.cat||"",brand:p.brand||"",spec:p.spec||"",stock:Number(p.stock)||0,unit:p.unit||"unid",cost:Number(p.cost)||0,price:Number(p.price)||0,min:Number(p.min??1),purchase_date:p.purchaseDate||null,finished:Boolean(p.finished)}));
   const orders=(old.orders||[]).map(o=>({id:o.id||uid(),date:o.date||today(),client:o.client||"",items:o.items||"",total:Number(o.total)||0,payment:o.payment||"",feito:Boolean(o.steps?.feito ?? (["Pronto","Entregue"].includes(o.status))),pago:Boolean(o.steps?.pago ?? (o.status==="Pago")),entregue:Boolean(o.steps?.entregue ?? (o.status==="Entregue"))}));
-  const cash=(old.cash||[]).map(c=>({id:c.id||uid(),date:c.date||today(),type:c.type||"Entrada",desc:c.desc||"",cat:c.cat||"",method:c.method||"",value:Number(c.value)||0}));
+  const cash=(old.cash||[]).map(c=>({id:c.id||uid(),date:c.date||today(),type:normalizeCashType(c.type||"Entrada"),desc:c.desc||c.description||c.descricao||"",cat:c.cat||"",method:c.method||"",value:Number(c.value)||0}));
   const results=await Promise.all([
     config.length?sb.from("config_products").insert(config):Promise.resolve({error:null}),
     products.length?sb.from("products").insert(products):Promise.resolve({error:null}),
@@ -534,9 +695,9 @@ async function migrateLegacyLocalStorageIfNeeded(){
   localStorage.setItem(KEY+"_supabase_migrated","1");
   const [configProducts,products2,orders2,cash2]=await Promise.all([selectTable("config_products"),selectTable("products"),selectTable("orders"),selectTable("cash")]);
   db.configProducts=configProducts.map(x=>({id:x.id,name:x.name,price:Number(x.price)||0,month:x.month}));
-  db.products=products2.map(x=>({...x,stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min)||1,purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
+  db.products=products2.map(x=>({...x,stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min??1),purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
   db.orders=orders2.map(x=>({id:x.id,date:x.date,client:x.client,items:x.items,total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
-  db.cash=cash2.map(x=>({id:x.id,date:x.date,type:x.type,desc:x.desc,cat:x.cat,method:x.method,value:Number(x.value)||0}));
+  db.cash=cash2.map(cashRowToLocal);
   notify("Dados antigos do navegador migrados para o Supabase.");
 }
 
@@ -545,17 +706,62 @@ async function removeRow(table,id){const {error}=await sb.from(table).delete().e
 async function save(){refreshAll()}
 function refreshAll(){renderDashboard();renderStock();renderOrders();renderCash()}
 
+function getMonthlyCashSummary(month){
+  const cashRows=db.cash.filter(item=>monthOf(item.date)===month);
+  const orders=db.orders.filter(order=>monthOf(order.date)===month);
+  const paidOrders=orders.filter(order=>order.steps.pago);
+  const products=db.products.filter(product=>monthOf(product.purchaseDate)===month);
+  const cashIncome=cashRows.filter(item=>normalizeCashType(item.type)==="Entrada").reduce((sum,item)=>sum+(Number(item.value)||0),0);
+  const cashExpenses=cashRows.filter(item=>normalizeCashType(item.type)==="Saída").reduce((sum,item)=>sum+(Number(item.value)||0),0);
+  const orderIncome=paidOrders.reduce((sum,order)=>sum+(Number(order.total)||0),0);
+  const stockExpenses=products.reduce((sum,product)=>sum+(Number(product.cost)||0),0);
+  const totalIncome=cashIncome+orderIncome,totalExpenses=cashExpenses+stockExpenses;
+  const returnPercent=getCashReturnPercent(),cashReturn=totalIncome*returnPercent/100;
+  return {cashRows,orders,paidOrders,products,cashIncome,cashExpenses,orderIncome,stockExpenses,totalIncome,totalExpenses,cashReturn,monthlyResult:totalIncome-totalExpenses-cashReturn,movementCount:cashRows.length+paidOrders.length+products.filter(product=>(Number(product.cost)||0)>0).length};
+}
+function getConsolidatedCashSummary(months){
+  const summaries=months.map(getMonthlyCashSummary);
+  const combined={cashRows:[],orders:[],paidOrders:[],products:[],cashIncome:0,cashExpenses:0,orderIncome:0,stockExpenses:0,totalIncome:0,totalExpenses:0,cashReturn:0,monthlyResult:0,movementCount:0};
+  summaries.forEach(summary=>{
+    combined.cashRows.push(...summary.cashRows);combined.orders.push(...summary.orders);combined.paidOrders.push(...summary.paidOrders);combined.products.push(...summary.products);
+    ["cashIncome","cashExpenses","orderIncome","stockExpenses","totalIncome","totalExpenses","cashReturn","monthlyResult","movementCount"].forEach(key=>combined[key]+=summary[key]);
+  });
+  return combined;
+}
+function getOpeningCashBalance(month){
+  const previousCash=db.cash.filter(item=>monthOf(item.date)<month);
+  const previousIncome=previousCash.filter(item=>normalizeCashType(item.type)==="Entrada").reduce((sum,item)=>sum+(Number(item.value)||0),0)
+    +db.orders.filter(order=>monthOf(order.date)<month&&order.steps.pago).reduce((sum,order)=>sum+(Number(order.total)||0),0);
+  const previousExpenses=previousCash.filter(item=>normalizeCashType(item.type)==="Saída").reduce((sum,item)=>sum+(Number(item.value)||0),0)
+    +db.products.filter(product=>monthOf(product.purchaseDate)<month).reduce((sum,product)=>sum+(Number(product.cost)||0),0);
+  return previousIncome-previousExpenses-previousIncome*getCashReturnPercent()/100;
+}
+function getDashboardCashBalance(months){
+  if(!months.length) return 0;
+  const firstMonth=months[0];
+  const previousCash=db.cash.filter(item=>monthOf(item.date)<firstMonth);
+  const previousIncome=previousCash.filter(item=>normalizeCashType(item.type)==="Entrada").reduce((sum,item)=>sum+(Number(item.value)||0),0)
+    +db.orders.filter(order=>monthOf(order.date)<firstMonth&&order.steps.pago).reduce((sum,order)=>sum+(Number(order.total)||0),0);
+  const previousExpenses=previousCash.filter(item=>normalizeCashType(item.type)==="Saída").reduce((sum,item)=>sum+(Number(item.value)||0),0)
+    +db.products.filter(product=>monthOf(product.purchaseDate)<firstMonth).reduce((sum,product)=>sum+(Number(product.cost)||0),0);
+  const selectedCash=db.cash.filter(item=>months.includes(monthOf(item.date)));
+  const selectedIncome=selectedCash.filter(item=>normalizeCashType(item.type)==="Entrada").reduce((sum,item)=>sum+(Number(item.value)||0),0)
+    +db.orders.filter(order=>months.includes(monthOf(order.date))&&order.steps.pago).reduce((sum,order)=>sum+(Number(order.total)||0),0);
+  const selectedExpenses=selectedCash.filter(item=>normalizeCashType(item.type)==="Saída").reduce((sum,item)=>sum+(Number(item.value)||0),0)
+    +db.products.filter(product=>months.includes(monthOf(product.purchaseDate))).reduce((sum,product)=>sum+(Number(product.cost)||0),0);
+  return previousIncome-previousExpenses+selectedIncome-selectedExpenses;
+}
+
 function renderDashboard(){
-  const received=db.orders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0);
-  const sales=db.orders.reduce((s,o)=>s+o.total,0);
-  const pending=db.orders.filter(o=>!o.steps.pago).reduce((s,o)=>s+(Number(o.total)||0),0);
-  const currentMonth=today().slice(0,7);
-  const stockExpenses=db.products.filter(p=>String(p.purchaseDate||"").slice(0,7)===currentMonth).reduce((sum,p)=>sum+(Number(p.cost)||0),0);
-  const balance=received-stockExpenses;
-  const coneCount=countOrderCones(db.orders);
+  const months=getSelectedReportMonths(),summary=getConsolidatedCashSummary(months);
+  const received=summary.paidOrders.reduce((sum,order)=>sum+(Number(order.total)||0),0);
+  const sales=summary.orders.reduce((sum,order)=>sum+(Number(order.total)||0),0);
+  const pending=summary.orders.filter(order=>!order.steps.pago).reduce((sum,order)=>sum+(Number(order.total)||0),0);
+  const balance=getDashboardCashBalance(months);
+  const coneCount=countOrderCones(summary.orders);
   document.getElementById("dashItems").textContent=db.products.filter(p=>!p.finished).length;
-  document.getElementById("dashOrders").textContent=db.orders.length;
-  document.getElementById("dashOrdersLabel").textContent=db.orders.length===1?"Pedido":"Pedidos";
+  document.getElementById("dashOrders").textContent=summary.orders.length;
+  document.getElementById("dashOrdersLabel").textContent=summary.orders.length===1?"Pedido":"Pedidos";
   document.getElementById("dashCones").textContent=coneCount;
   document.getElementById("dashConesLabel").textContent=coneCount===1?"Cone":"Cones";
   document.getElementById("dashSales").textContent=money(sales);
@@ -565,65 +771,96 @@ function renderDashboard(){
   const balanceCard=document.getElementById("dashBalanceCard");
   balanceCard.classList.toggle("balance-negative",balance<0);
   balanceCard.classList.toggle("balance-positive",balance>=0);
-  document.getElementById("dashBalanceExpenses").textContent=`Saídas ${money(stockExpenses)}`;
-  document.getElementById("dashBalanceReceived").textContent=`Entradas ${money(received)}`;
-  renderBuyerRanking();renderFlavorRanking();
+  document.getElementById("dashBalanceExpenses").textContent=`Saídas ${money(summary.totalExpenses)}`;
+  document.getElementById("dashBalanceReceived").textContent=`Entradas ${money(summary.totalIncome)}`;
+  renderBuyerRanking(summary.orders);renderFlavorRanking(summary.orders);
 }
-function renderBuyerRanking(){
-  const buyers=new Map(); db.orders.forEach(order=>{const name=String(order.client||"").trim();if(!name)return;const key=name.toLowerCase();const buyer=buyers.get(key)||{name,orders:0,total:0};buyer.orders++;buyer.total+=Number(order.total)||0;buyers.set(key,buyer)});
+function renderBuyerRanking(orders){
+  const buyers=new Map(); orders.forEach(order=>{const name=String(order.client||"").trim();if(!name)return;const key=name.toLowerCase();const buyer=buyers.get(key)||{name,orders:0,total:0};buyer.orders++;buyer.total+=Number(order.total)||0;buyers.set(key,buyer)});
   const ranking=[...buyers.values()].sort((a,b)=>b.total-a.total||b.orders-a.orders).slice(0,3);
   if(!ranking.length){document.getElementById("buyerRanking").innerHTML='<div class="empty buyer-empty">Nenhum comprador encontrado.</div>';return}
-  document.getElementById("buyerRanking").innerHTML=ranking.map((buyer,index)=>{const place=index+1,medal=place===1?"🥇":place===2?"🥈":"🥉";return `<article class="buyer-rank place-${place}"><div class="rank-avatar"><img class="buyer-avatar" src="img${place}.png" alt="Imagem do ${place}º lugar" loading="lazy"><span class="flavor-medal">${medal}</span></div><div class="buyer-name" title="${esc(buyer.name)}">${esc(buyer.name)}</div><div class="buyer-sales"><strong>${money(buyer.total)}</strong><small>${buyer.orders} ${buyer.orders===1?"venda":"vendas"}</small></div></article>`}).join("");
+  document.getElementById("buyerRanking").innerHTML=ranking.map((buyer,index)=>{const place=index+1,medal=place===1?"🥇":place===2?"🥈":"🥉";return `<article class="buyer-rank place-${place}"><div class="rank-avatar"><img class="buyer-avatar" src="img${place}.png" alt="Imagem do ${place}º lugar" loading="lazy"><span class="flavor-medal">${medal}</span></div><div class="buyer-name" title="${esc(buyer.name)}">${esc(buyer.name)}</div><div class="buyer-sales"><strong>${money(buyer.total)}</strong><small>${buyer.orders} ${buyer.orders===1?"Pedido":"Pedidos"}</small></div></article>`}).join("");
 }
-function renderFlavorRanking(){
+function renderFlavorRanking(orders){
   const flavors=[{name:"Brigadeiro",pattern:/\bbrigadeiros?\b/,quantity:0},{name:"Beijinho",pattern:/\bbeijinhos?\b/,quantity:0},{name:"Casadinho",pattern:/\bcasadinhos?\b/,quantity:0},{name:"Doce de Leite",pattern:/\bdoce\s+de\s+leite\b/,quantity:0}];
-  db.orders.forEach(order=>String(order.items||"").split(/\s*[|+]\s*/).forEach(item=>{const m=item.match(/^\s*(\d+)\s*x?\s*/i),q=m?Number(m[1]):1,n=item.toLocaleLowerCase("pt-BR");flavors.forEach(f=>{if(f.pattern.test(n))f.quantity+=q})}));
-  const medals=["🥇","🥈","🥉","🏅"];document.getElementById("flavorRanking").innerHTML=[...flavors].sort((a,b)=>b.quantity-a.quantity).map((flavor,index)=>{const place=index+1;return `<article class="flavor-rank place-${place}"><div class="rank-avatar"><img class="buyer-avatar" src="img${place}${place}.png" alt="Imagem do ${place}º lugar no ranking de sabores" loading="lazy"><span class="flavor-medal">${medals[index]}</span></div><div class="buyer-name">${esc(flavor.name)}</div><div class="buyer-sales"><strong>${flavor.quantity}</strong><small>${flavor.quantity===1?"unidade vendida":"Vendas"}</small></div></article>`}).join("");
+  orders.forEach(order=>String(order.items||"").split(/\s*[|+]\s*/).forEach(item=>{const m=item.match(/^\s*(\d+)\s*x?\s*/i),q=m?Number(m[1]):1,n=item.toLocaleLowerCase("pt-BR");flavors.forEach(f=>{if(f.pattern.test(n))f.quantity+=q})}));
+  const medals=["🥇","🥈","🥉","🏅"];document.getElementById("flavorRanking").innerHTML=[...flavors].sort((a,b)=>b.quantity-a.quantity).map((flavor,index)=>{const place=index+1;return `<article class="flavor-rank place-${place}"><div class="rank-avatar"><img class="buyer-avatar" src="img${place}${place}.png" alt="Imagem do ${place}º lugar no ranking de sabores" loading="lazy"><span class="flavor-medal">${medals[index]}</span></div><div class="buyer-name">${esc(flavor.name)}</div><div class="buyer-sales"><strong>${flavor.quantity}</strong><small>${flavor.quantity===1?"unidade vendida":"Feitos"}</small></div></article>`}).join("");
 }
 function renderStock(){
   const q=(document.getElementById("stockSearch")?.value||"").toLowerCase(),filter=document.getElementById("stockFilter")?.value||"";
   const rows=db.products.filter(p=>{const [cls]=statusProduct(p);return (p.name+" "+p.cat+" "+p.spec+" "+p.brand).toLowerCase().includes(q)&&(!filter||cls===filter)});
   const activeProducts=db.products.filter(p=>!p.finished);document.getElementById("stockCount").textContent=activeProducts.length;document.getElementById("stockValue").textContent=money(activeProducts.reduce((sum,p)=>sum+Math.round((Number(p.cost)||0)*100),0)/100);
-  document.getElementById("stockTable").innerHTML=rows.map(p=>`<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.spec)}</td><td>${esc(p.brand)}</td><td><b>${p.stock}</b></td><td>${p.unit}</td><td>${money(p.cost)}</td><td><div class="stock-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button><button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></div></td><td class="stock-finished-cell"><div class="stock-finished-control"><input type="checkbox" ${p.finished?"checked":""} aria-label="Marcar ${esc(p.name)} como acabou" onchange="toggleProductFinished('${p.id}',this.checked)"></div></td></tr>`).join("")||`<tr><td colspan="8" class="empty">Nenhum produto encontrado.</td></tr>`;
+  document.getElementById("stockTable").innerHTML=rows.map(p=>`<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.cat||"")}</td><td>${esc(p.spec)}</td><td>${esc(p.brand)}</td><td><b>${p.stock}</b></td><td>${esc(p.unit==="unid"?"Unid.":p.unit)}</td><td>${money(p.cost)}</td><td><div class="stock-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar produto" title="Editar produto" onclick="openProduct('${p.id}')">✎</button><button class="btn small order-icon-btn" aria-label="Excluir produto" title="Excluir produto" onclick="deleteProduct('${p.id}')">🗑</button></div></td><td class="stock-finished-cell"><div class="stock-finished-control"><input type="checkbox" ${p.finished?"checked":""} aria-label="Marcar ${esc(p.name)} como acabou" onchange="toggleProductFinished('${p.id}',this.checked)"></div></td></tr>`).join("")||`<tr><td colspan="9" class="empty">Nenhum produto encontrado.</td></tr>`;
 }
 async function toggleProductFinished(id,finished){const p=db.products.find(x=>x.id===id);if(!p)return;p.finished=finished;try{await saveRow("products",{id:p.id,name:p.name,cat:p.cat||"",brand:p.brand||"",spec:p.spec||"",stock:p.stock,unit:p.unit,cost:p.cost,price:p.price||0,min:p.min,purchase_date:p.purchaseDate||null,finished});save()}catch(e){notify("Erro ao atualizar produto: "+e.message,true)}}
 
 function countOrderCones(orders){return orders.reduce((total,order)=>total+String(order.items||"").split(/\s*[|+]\s*/).reduce((sum,item)=>{if(!item.trim())return sum;const quantity=item.match(/^\s*(\d+)\s*x?\s*/i);return sum+(quantity?Number(quantity[1]):1)},0),0)}
 function renderOrders(){
   const q=(document.getElementById("orderSearch")?.value||"").toLowerCase(),filter=document.getElementById("orderFilter")?.value||"";
+  const selectedMonths=new Set(getSelectedReportMonths());
+  const monthOrders=db.orders.filter(order=>selectedMonths.has(monthOf(order.date)));
   const status=filter.startsWith("nao_")?filter.slice(4):filter,expected=!filter.startsWith("nao_");
-  const rows=db.orders.filter(o=>(o.client+" "+o.items).toLowerCase().includes(q)&&(!filter||Boolean(o.steps[status])===expected)).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
-  const received=db.orders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0),toReceive=db.orders.filter(o=>!o.steps.pago).reduce((s,o)=>s+o.total,0);
-  const overdue=db.orders.filter(o=>!o.steps.pago&&o.payment&&o.payment<today()),overdueValue=overdue.reduce((sum,o)=>sum+(Number(o.total)||0),0),sales=db.orders.reduce((sum,o)=>sum+(Number(o.total)||0),0);
-  const coneCount=countOrderCones(db.orders),madeConeCount=countOrderCones(db.orders.filter(o=>o.steps.feito));
+  const rows=monthOrders.filter(o=>(o.client+" "+o.items).toLowerCase().includes(q)&&(!filter||Boolean(o.steps[status])===expected)).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+  const received=monthOrders.filter(o=>o.steps.pago).reduce((s,o)=>s+o.total,0),toReceive=monthOrders.filter(o=>!o.steps.pago).reduce((s,o)=>s+o.total,0);
+  const overdue=monthOrders.filter(o=>!o.steps.pago&&o.payment&&o.payment<today()),overdueValue=overdue.reduce((sum,o)=>sum+(Number(o.total)||0),0),sales=monthOrders.reduce((sum,o)=>sum+(Number(o.total)||0),0);
+  const coneCount=countOrderCones(monthOrders),madeConeCount=countOrderCones(monthOrders.filter(o=>o.steps.feito));
   document.getElementById("overduePaymentsCard").classList.toggle("has-overdue",overdue.length>0);
-  document.getElementById("orderCount").textContent=db.orders.length;document.getElementById("orderCountLabel").textContent=db.orders.length===1?"Pedido":"Pedidos";document.getElementById("orderConeCount").textContent=coneCount;document.getElementById("orderConeLabel").textContent=coneCount===1?"Cone":"Cones";document.getElementById("orderDoneCount").textContent=db.orders.filter(o=>o.steps.feito).length;document.getElementById("orderPaidCount").textContent=db.orders.filter(o=>o.steps.pago).length;document.getElementById("orderDeliveredCount").textContent=db.orders.filter(o=>o.steps.entregue).length;document.getElementById("orderMadeConeCount").textContent=madeConeCount;document.getElementById("orderOverdueCount").textContent=overdue.length;document.getElementById("orderOverdueValue").textContent=money(overdueValue);
+  document.getElementById("orderCount").textContent=monthOrders.length;document.getElementById("orderCountLabel").textContent=monthOrders.length===1?"Pedido":"Pedidos";document.getElementById("orderConeCount").textContent=coneCount;document.getElementById("orderConeLabel").textContent=coneCount===1?"Cone":"Cones";document.getElementById("orderDoneCount").textContent=monthOrders.filter(o=>o.steps.feito).length;document.getElementById("orderPaidCount").textContent=monthOrders.filter(o=>o.steps.pago).length;document.getElementById("orderDeliveredCount").textContent=monthOrders.filter(o=>o.steps.entregue).length;document.getElementById("orderMadeConeCount").textContent=madeConeCount;document.getElementById("orderOverdueCount").textContent=overdue.length;document.getElementById("orderOverdueValue").textContent=money(overdueValue);
   document.getElementById("orderSales").textContent=money(sales);document.getElementById("orderSalesReceived").textContent=`Pagamentos Recebidos ${money(received)}`;document.getElementById("orderSalesPending").textContent=`Pagamentos Pendentes ${money(toReceive)}`;
   document.getElementById("orderCards").innerHTML=rows.map(o=>{const steps=[["Feito",o.steps.feito],["Pago",o.steps.pago],["Entregue",o.steps.entregue]];return `<article class="order"><div class="order-top"><h3>👤 ${esc(o.client)}</h3><div class="order-stage-badges">${steps.map(([label,done])=>`<span class="badge ${done?"ok":"warn"}">${done?"✓":"○"} ${label}</span>`).join("")}</div></div><p>📅 ${formatDate(o.date)}</p><p>🧁 ${esc(o.items)}</p><div class="order-footer"><div class="order-total">${money(o.total)}</div><div class="order-actions"><button class="btn small secondary order-icon-btn" aria-label="Editar pedido" title="Editar pedido" onclick="openOrder('${o.id}')">✎</button><button class="btn small order-icon-btn" aria-label="Excluir pedido" title="Excluir pedido" onclick="deleteOrder('${o.id}')">🗑</button></div></div></article>`}).join("")||`<div class="empty">Nenhum pedido encontrado.</div>`;
 }
 function renderCash(){
-  const input=db.cash.filter(c=>c.type==="Entrada").reduce((s,c)=>s+c.value,0),output=db.cash.filter(c=>c.type==="Saída").reduce((s,c)=>s+c.value,0),balance=input-output;
-  const orderIncome=db.orders.filter(order=>order.steps.pago).reduce((sum,order)=>sum+(Number(order.total)||0),0);
-  const stockExpenses=db.products.reduce((sum,product)=>sum+(Number(product.cost)||0),0);
-  const totalIncome=input+orderIncome,totalExpenses=output+stockExpenses,preReturn=totalIncome-totalExpenses;
-  const returnPercent=getCashReturnPercent(),cashReturn=Math.max(0,preReturn)*returnPercent/100,finalResult=preReturn-cashReturn;
-  document.getElementById("cashIn").textContent=money(input);document.getElementById("cashOut").textContent=money(output);document.getElementById("cashBalance").textContent=money(balance);document.getElementById("cashCount").textContent=db.cash.length;
-  document.getElementById("dreCashIncome").textContent=money(input);document.getElementById("dreOrderIncome").textContent=money(orderIncome);document.getElementById("cashIn2").textContent=money(totalIncome);
-  document.getElementById("dreCashExpenses").textContent=money(output);document.getElementById("dreStockExpenses").textContent=money(stockExpenses);document.getElementById("cashOut2").textContent=money(totalExpenses);
-  document.getElementById("dreBeforeReturn").textContent=money(preReturn);document.getElementById("dreReturnLabel").textContent=`Retorno ao caixa (${returnPercent}%)`;document.getElementById("dreCashReturn").textContent=money(cashReturn);
-  const result=document.getElementById("cashBalance2");result.textContent=money(finalResult);result.classList.toggle("cash-positive",finalResult>=0);result.classList.toggle("cash-negative",finalResult<0);
+  const months=getSelectedReportMonths(),summary=getConsolidatedCashSummary(months),openingBalance=months.length?getOpeningCashBalance(months[0]):0;
+  const {cashIncome,cashExpenses,orderIncome,stockExpenses,totalIncome,totalExpenses,cashReturn,monthlyResult,movementCount}=summary;
+  const preReturn=totalIncome-totalExpenses,closingBalance=openingBalance+monthlyResult;
+  const returnPercent=getCashReturnPercent();
+  const cashBalanceEl=document.getElementById("cashBalance");
+  cashBalanceEl.textContent=money(closingBalance);cashBalanceEl.classList.toggle("cash-positive",closingBalance>=0);cashBalanceEl.classList.toggle("cash-negative",closingBalance<0);
+  document.getElementById("cashIn").textContent=money(totalIncome);document.getElementById("cashIn").classList.toggle("cash-positive",totalIncome>=0);document.getElementById("cashOut").textContent=money(totalExpenses);document.getElementById("cashOut").classList.toggle("cash-negative",totalExpenses>0);
+  document.getElementById("cashCount").textContent=movementCount;
+  document.getElementById("drePeriod").textContent=`${months.length?months.map(month=>new Date(`${month}-01T12:00:00`).toLocaleDateString("pt-BR",{month:"long",year:"numeric"})).join(", "):"Nenhum mês selecionado"} · Regime de caixa`;
+  document.getElementById("dreOpeningBalance").textContent=money(openingBalance);
+  document.getElementById("dreCashIncome").textContent=money(cashIncome);document.getElementById("dreOrderIncome").textContent=money(orderIncome);document.getElementById("cashIn2").textContent=money(totalIncome);
+  document.getElementById("dreCashExpenses").textContent=money(cashExpenses);document.getElementById("dreStockExpenses").textContent=money(stockExpenses);document.getElementById("cashOut2").textContent=money(totalExpenses);
+  document.getElementById("dreBeforeReturn").textContent=money(preReturn);document.getElementById("dreReturnLabel").textContent=`Índice de Retenção dos Lucros - Retorno ao Caixa (${returnPercent}%)`;document.getElementById("dreCashReturn").textContent=money(cashReturn);
+  const result=document.getElementById("cashBalance2");result.textContent=money(monthlyResult);result.classList.toggle("cash-positive",monthlyResult>=0);result.classList.toggle("cash-negative",monthlyResult<0);
+  const closing=document.getElementById("dreClosingBalance");closing.textContent=money(closingBalance);closing.classList.toggle("cash-positive",closingBalance>=0);closing.classList.toggle("cash-negative",closingBalance<0);
+
+  const q=(document.getElementById("cashSearch")?.value||"").toLowerCase();
+  const filter=document.getElementById("cashFilter")?.value||"";
+  const selectedMonths=new Set(months);
+  const rows=summary.cashRows.filter(c=>selectedMonths.has(monthOf(c.date))&&(String(c.desc||"")+" "+String(c.cat||"")+" "+String(c.method||"")).toLowerCase().includes(q)&&(!filter||normalizeCashType(c.type)===filter)).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+  document.getElementById("cashTable").innerHTML=rows.map(c=>`<tr><td>${formatDate(c.date)}</td><td><span class="badge ${normalizeCashType(c.type)==="Entrada"?"ok":"warn"}">${normalizeCashType(c.type)}</span></td><td>${esc(c.desc||"")}</td><td>${esc(c.cat||"")}</td><td>${esc(c.method||"")}</td><td><div class="cash-value"><span>${money(c.value)}</span><div class="cash-row-actions"><button class="btn small cash-edit" type="button" aria-label="Editar lançamento" title="Editar lançamento" onclick="openCash('${c.id}')">✎</button><button class="btn small cash-delete" type="button" aria-label="Excluir lançamento" title="Excluir lançamento" onclick="deleteCash('${c.id}')">🗑</button></div></div></td></tr>`).join("")||`<tr><td colspan="6" class="empty">Nenhuma movimentação encontrada.</td></tr>`;
+}
+
+function toggleCashPanel(){
+  const panel=document.getElementById("cashMovementsPanel");
+  const button=document.getElementById("toggleCashPanelButton");
+  if(!panel||!button) return;
+  const isOpen=panel.classList.contains("cash-movements-hidden");
+  panel.classList.toggle("cash-movements-hidden",!isOpen);
+  button.setAttribute("aria-expanded",String(isOpen));
+  button.setAttribute("aria-label",isOpen?"Ocultar Movimentações":"Mostrar Movimentações");
+  button.title=isOpen?"Ocultar Movimentações":"Mostrar Movimentações";
+  button.textContent=isOpen?"⌃":"⌄";
 }
 
 function openModal(title,body){document.getElementById("modalTitle").textContent=title;document.getElementById("modalBody").innerHTML=body;document.getElementById("modal").classList.add("show")}
 function closeModal(){confirmationAction=null;document.getElementById("modal").classList.remove("show")}
-function askConfirmation(title,message,buttonText,action){confirmationAction=action;openModal(title,`<div style="padding:18px"><p style="margin:0;color:var(--text);line-height:1.5">${message}</p><div class="modal-footer" style="padding:18px 0 0"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button type="button" class="btn" onclick="runConfirmation()">🗑 ${esc(buttonText)}</button></div></div>`)}
+function askConfirmation(title,message,buttonText,action){
+  if(typeof action === "function") action();
+  confirmationAction=null;
+}
 async function runConfirmation(){const action=confirmationAction;closeModal();if(action)await action()}
 
 function openProduct(id){
   const p=db.products.find(x=>x.id===id)||{id:"",name:"",cat:"",brand:"",spec:"",stock:0,unit:"unid",cost:0,price:0,min:1,purchaseDate:today()};
-  openModal(id?"Editar produto":"Novo produto",`<form class="form" onsubmit="saveProduct(event,'${id||""}')"><div class="field"><label>Produto</label><input class="input" name="name" required value="${esc(p.name)}"></div><div class="field full"><label>Especificação</label><input class="input" name="spec" value="${esc(p.spec)}" placeholder="Ex.: Pacote 1kg / 250ml / Unidade"></div><div class="field"><label>Marca</label><input class="input" name="brand" value="${esc(p.brand)}" placeholder="Marca do produto"></div><div class="field"><label>Quantidade</label><input class="input" name="stock" type="number" step="1" required value="${Math.round(Number(p.stock)||0)}"></div><div class="field"><label>Data da compra do estoque</label><input class="input" name="purchaseDate" type="date" value="${esc(p.purchaseDate)}"></div><div class="field"><label>Unidade</label><select class="select" name="unit"><option ${p.unit==="unid"?"selected":""}>unid</option><option ${p.unit==="kg"?"selected":""}>kg</option><option ${p.unit==="g"?"selected":""}>g</option><option ${p.unit==="L"?"selected":""}>L</option><option ${p.unit==="cx"?"selected":""}>cx</option></select></div><div class="field"><label>Custo</label><input class="input" name="cost" type="number" step="0.01" value="${p.cost}"></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar produto</button></div></form>`)
+  const types=getProductTypes();
+  if(p.cat&&!types.includes(p.cat)) types.unshift(p.cat);
+  const typeOptions=types.map(type=>`<option value="${esc(type)}" ${type===p.cat?"selected":""}>${esc(type)}</option>`).join("");
+  openModal(id?"Editar produto":"Novo produto",`<form class="form" onsubmit="saveProduct(event,'${id||""}')"><div class="field"><label>Produto</label><input class="input" name="name" required value="${esc(p.name)}"></div><div class="field"><label>Tipo</label><select class="select" name="type"><option value="">Selecione um tipo</option>${typeOptions}</select></div><div class="field full"><label>Especificação</label><input class="input" name="spec" value="${esc(p.spec)}" placeholder="Ex.: Pacote 1kg / 250ml / Unidade"></div><div class="field"><label>Marca</label><input class="input" name="brand" value="${esc(p.brand)}" placeholder="Marca do produto"></div><div class="field"><label>Quantidade</label><input class="input" name="stock" type="number" step="1" required value="${Math.round(Number(p.stock)||0)}"></div><div class="field"><label>Data da compra do estoque</label><input class="input" name="purchaseDate" type="date" value="${esc(p.purchaseDate)}"></div><div class="field"><label>Unidade</label><select class="select" name="unit"><option ${p.unit==="unid"?"selected":""}>unid</option><option ${p.unit==="kg"?"selected":""}>kg</option><option ${p.unit==="g"?"selected":""}>g</option><option ${p.unit==="L"?"selected":""}>L</option><option ${p.unit==="cx"?"selected":""}>cx</option></select></div><div class="field"><label>Custo</label><input class="input" name="cost" type="number" step="0.01" value="${p.cost}"></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar produto</button></div></form>`)
 }
-async function saveProduct(e,id){e.preventDefault();const f=new FormData(e.target),existing=db.products.find(p=>p.id===id),obj={id:id||uid(),name:f.get("name"),cat:existing?.cat||"",brand:f.get("brand"),spec:f.get("spec"),stock:Math.round(Number(f.get("stock"))||0),purchase_date:f.get("purchaseDate")||null,unit:f.get("unit"),cost:+f.get("cost")||0,price:existing?.price||0,min:existing?.min??1,finished:existing?.finished??false};try{await saveRow("products",obj);const local={...obj,purchaseDate:obj.purchase_date||""};if(id)db.products=db.products.map(p=>p.id===id?local:p);else db.products.push(local);closeModal();save();notify("Produto salvo.")}catch(e){notify("Erro ao salvar produto: "+e.message,true)}}
+async function saveProduct(e,id){e.preventDefault();const f=new FormData(e.target),existing=db.products.find(p=>p.id===id),obj={id:id||uid(),name:f.get("name"),cat:f.get("type"),brand:f.get("brand"),spec:f.get("spec"),stock:Math.round(Number(f.get("stock"))||0),purchase_date:f.get("purchaseDate")||null,unit:f.get("unit"),cost:+f.get("cost")||0,price:existing?.price||0,min:existing?.min??1,finished:existing?.finished??false};try{await saveRow("products",obj);const local={...obj,purchaseDate:obj.purchase_date||""};if(id)db.products=db.products.map(p=>p.id===id?local:p);else db.products.push(local);closeModal();save();notify("Produto salvo.")}catch(e){notify("Erro ao salvar produto: "+e.message,true)}}
 async function deleteProduct(id){const product=db.products.find(item=>item.id===id);if(!product)return;askConfirmation("Excluir produto",`Tem certeza de que deseja excluir <b>${esc(product.name)}</b>?`,"Excluir produto",async()=>{try{await removeRow("products",id);db.products=db.products.filter(item=>item.id!==id);save();notify("Produto excluído.")}catch(e){notify("Erro ao excluir produto: "+e.message,true)}})}
 
 function openOrder(id){
@@ -640,32 +877,87 @@ window.updateOrderTotal=function(){const total=[...document.querySelectorAll("#o
 async function saveOrder(e,id){e.preventDefault();const f=new FormData(e.target);const itemsRaw=[...document.querySelectorAll("#orderItemRows .order-item-row")].map(row=>{const q=Math.max(1,parseInt(row.querySelector("input").value,10)||1),name=row.querySelector("select").value;return name?`${q}x ${name}`:""}).filter(Boolean).join(" | ");const obj={id:id||uid(),date:f.get("date"),client:f.get("client"),items:itemsRaw,total:+f.get("total")||0,payment:f.get("payment")||"",feito:f.has("feito"),pago:f.has("pago"),entregue:f.has("entregue")};try{await saveRow("orders",obj);const local={id:obj.id,date:obj.date,client:obj.client,items:obj.items,total:obj.total,payment:obj.payment,steps:{feito:obj.feito,pago:obj.pago,entregue:obj.entregue}};if(id)db.orders=db.orders.map(o=>o.id===id?local:o);else db.orders.push(local);closeModal();save();notify("Pedido salvo.")}catch(e){notify("Erro ao salvar pedido: "+e.message,true)}}
 async function deleteOrder(id){const order=db.orders.find(item=>item.id===id);if(!order)return;askConfirmation("Excluir pedido",`Tem certeza de que deseja excluir o pedido <b>#${esc(id.slice(-5).toUpperCase())}</b>?`,"Excluir pedido",async()=>{try{await removeRow("orders",id);db.orders=db.orders.filter(item=>item.id!==id);save();notify("Pedido excluído.")}catch(e){notify("Erro ao excluir pedido: "+e.message,true)}})}
 
-function openCash(){openModal("Novo lançamento",`<form class="form" onsubmit="saveCash(event)"><div class="field"><label>Data</label><input class="input" type="date" name="date" value="${today()}" required></div><div class="field"><label>Tipo</label><select class="select" name="type"><option>Entrada</option><option>Saída</option></select></div><div class="field full"><label>Descrição</label><input class="input" name="desc" required placeholder="Ex.: Venda de doces / Compra de ingredientes"></div><div class="field"><label>Categoria</label><input class="input" name="cat" value="Vendas" required></div><div class="field"><label>Forma de pagamento</label><select class="select" name="method"><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Transferência</option><option>Boleto</option></select></div><div class="field"><label>Valor</label><input class="input" type="number" step="0.01" name="value" required></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar lançamento</button></div></form>`)}
-async function saveCash(e){e.preventDefault();const f=new FormData(e.target),obj={id:uid(),date:f.get("date"),type:f.get("type"),desc:f.get("desc"),cat:f.get("cat"),method:f.get("method"),value:+f.get("value")||0};try{await saveRow("cash",obj);db.cash.push(obj);closeModal();save();notify("Lançamento salvo.")}catch(e){notify("Erro ao salvar lançamento: "+e.message,true)}}
-async function deleteCash(id){const entry=db.cash.find(item=>item.id===id);if(!entry)return;askConfirmation("Excluir lançamento",`Tem certeza de que deseja excluir <b>${esc(entry.desc)}</b>?`,"Excluir lançamento",async()=>{try{await removeRow("cash",id);db.cash=db.cash.filter(item=>item.id!==id);save();notify("Lançamento excluído.")}catch(e){notify("Erro ao excluir lançamento: "+e.message,true)}})}
+function openCash(id){
+  const entry=db.cash.find(item=>item.id===id)||{id:"",date:today(),type:"Entrada",desc:"",cat:"Vendas",method:"Pix",value:0};
+  const typeValue=normalizeCashType(entry.type||"Entrada");
+  openModal(id?"Editar lançamento":"Novo lançamento",`<form class="form" onsubmit="saveCash(event,'${id||""}')"><div class="field"><label>Data</label><input class="input" type="date" name="date" value="${entry.date||today()}" required></div><div class="field"><label>Tipo</label><select class="select" name="type"><option ${typeValue==="Entrada"?"selected": ""}>Entrada</option><option ${typeValue==="Saída"?"selected": ""}>Saída</option></select></div><div class="field full"><label>Descrição</label><input class="input" name="desc" value="${esc(entry.desc||"")}" required placeholder="Ex.: Venda de doces / Compra de ingredientes"></div><div class="field"><label>Categoria</label><input class="input" name="cat" value="${esc(entry.cat||"Vendas")}" required></div><div class="field"><label>Forma de pagamento</label><select class="select" name="method"><option ${entry.method==="Pix"?"selected": ""}>Pix</option><option ${entry.method==="Dinheiro"?"selected": ""}>Dinheiro</option><option ${entry.method==="Cartão"?"selected": ""}>Cartão</option><option ${entry.method==="Transferência"?"selected": ""}>Transferência</option><option ${entry.method==="Boleto"?"selected": ""}>Boleto</option></select></div><div class="field"><label>Valor</label><input class="input" type="number" step="0.01" name="value" value="${Number(entry.value||0).toFixed(2)}" required></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar lançamento</button></div></form>`)
+}
+async function saveCash(e,id=""){
+  e.preventDefault();
+  const f=new FormData(e.target);
+  const obj={id:id||uid(),date:f.get("date"),type:normalizeCashType(f.get("type")),desc:String(f.get("desc")||""),cat:f.get("cat"),method:f.get("method"),value:+f.get("value")||0};
+  const payload=cashRowToDb(obj);
+  try{
+    await saveRow("cash",payload);
+    if(id){db.cash=db.cash.map(item=>item.id===id?obj:item)}else{db.cash.push(obj)}
+    closeModal();
+    save();
+    notify("Lançamento salvo.");
+  }catch(e){
+    notify("Erro ao salvar lançamento: "+e.message,true);
+  }
+}
+async function deleteCash(id){
+  const entry=db.cash.find(item=>item.id===id); if(!entry)return;
+  try{
+    await removeRow("cash",id);
+    db.cash=db.cash.filter(item=>item.id!==id);
+    save();
+    notify("Lançamento excluído.");
+  }catch(e){
+    notify("Erro ao excluir lançamento: "+e.message,true);
+  }
+}
 function openQuick(){openModal("O que deseja cadastrar?",`<div style="padding:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px"><button class="btn" onclick="closeModal();openProduct()">📦<br>Novo produto</button><button class="btn" onclick="closeModal();openOrder()">🧁<br>Novo pedido</button></div>`)}
 
 async function addConfigProduct(name,price,monthFilter="all"){
   const value=String(name||"").trim();if(!value)return;const month=monthFilter&&monthFilter!=="all"?monthFilter:today().slice(0,7);if(db.configProducts.some(item=>item.name===value&&item.month===month))return;const row={id:uid(),name:value,price:Number(price)||0,month};try{await saveRow("config_products",row);db.configProducts.push(row);openSettings(monthFilter);notify("Produto de pedido adicionado.")}catch(e){notify("Erro ao adicionar produto: "+e.message,true)}}
 async function saveConfigProductPrice(index,price){const product=db.configProducts[index];if(!product)return;product.price=Math.max(0,Number(price)||0);try{await saveRow("config_products",product);refreshAll();notify("Preço atualizado.")}catch(e){notify("Erro ao atualizar preço: "+e.message,true)}}
 async function removeConfigProduct(index,monthFilter="all"){const product=db.configProducts[index];if(!product)return;try{await removeRow("config_products",product.id);db.configProducts=db.configProducts.filter(item=>item.id!==product.id);openSettings(monthFilter);notify("Produto removido.")}catch(e){notify("Erro ao remover produto: "+e.message,true)}}
+function toggleSettingsTopic(id){
+  const content=document.getElementById(id),button=document.querySelector(`button[aria-controls="${id}"]`);
+  if(!content||!button)return;
+  const expanded=!content.hidden;
+  content.hidden=expanded;
+  button.setAttribute("aria-expanded",String(!expanded));
+  button.setAttribute("aria-label",`${expanded?"Mostrar":"Ocultar"} ${button.dataset.topic}`);
+  button.title=button.getAttribute("aria-label");
+  button.textContent=expanded?"⌄":"⌃";
+}
 function openSettings(monthFilter="all"){
-  const months=[...new Set([today().slice(0,7),...(db.configProducts||[]).map(item=>item.month)])].filter(Boolean).sort().reverse();
-  const monthText=month=>new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
-  const visible=(db.configProducts||[]).map((item,index)=>({...item,index})).filter(item=>monthFilter==="all"||item.month===monthFilter);
+  const reportMonths=getReportMonths(),selectedReportMonths=new Set(getSelectedReportMonths());
+  const reportMonthsByYear=new Map();
+  reportMonths.forEach(month=>{const year=month.slice(0,4);if(!reportMonthsByYear.has(year))reportMonthsByYear.set(year,[]);reportMonthsByYear.get(year).push(month)});
+  const monthName=month=>new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString("pt-BR",{month:"long"});
+  const visible=(db.configProducts||[]).map((item,index)=>({...item,index}));
+  const productTypes=getProductTypes();
   openModal("Configurações",`<div class="config-layout">
     <div class="config-panel">
-      <div class="config-header"><h3>Retorno ao caixa</h3></div>
-      <form onsubmit="event.preventDefault();saveCashReturnPercent(this.returnPercent.value,'${monthFilter}')" style="display:flex;align-items:end;gap:8px;flex-wrap:wrap">
-        <div class="field" style="flex:1;min-width:180px"><label for="cashReturnPercent">Percentual destinado ao caixa (%)</label><input class="input" id="cashReturnPercent" name="returnPercent" type="number" min="0" max="100" step="0.01" value="${getCashReturnPercent()}" required></div>
-        <button class="btn small" type="submit">Salvar</button>
-      </form>
+      <div class="config-header"><h3>Retorno ao Caixa</h3><button class="settings-toggle" type="button" data-topic="Retorno ao Caixa" aria-label="Mostrar Retorno ao Caixa" title="Mostrar Retorno ao Caixa" aria-expanded="false" aria-controls="settingsReturnContent" onclick="toggleSettingsTopic('settingsReturnContent')">⌄</button></div>
+      <div id="settingsReturnContent" class="config-topic-body" hidden>
+        <form onsubmit="event.preventDefault();saveCashReturnPercent(this.returnPercent.value,'${monthFilter}')" style="display:flex;align-items:end;gap:8px;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:180px"><label for="cashReturnPercent">Percentual destinado ao caixa (%)</label><input class="input" id="cashReturnPercent" name="returnPercent" type="number" min="0" max="100" step="0.01" value="${getCashReturnPercent()}" required></div>
+          <button class="btn small" type="submit">Salvar</button>
+        </form>
+      </div>
     </div>
     <div class="config-panel">
-      <div class="field" style="margin-bottom:12px"><label for="settingsMonth">Filtrar por mês</label><select class="select" id="settingsMonth" onchange="openSettings(this.value)"><option value="all" ${monthFilter==="all"?"selected":""}>Todos os meses</option>${months.map(month=>`<option value="${month}" ${monthFilter===month?"selected":""}>${monthText(month)}</option>`).join("")}</select></div>
-      <div class="config-header"><h3>Produtos Cadastrados</h3></div>
-      <form onsubmit="event.preventDefault();addConfigProduct(this.name.value,this.price.value,document.getElementById('settingsMonth').value);this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><input class="input" name="name" placeholder="Ex.: Cone Doce de Leite" style="flex:1;min-width:180px"><input class="input" name="price" type="number" min="0" step="0.01" placeholder="Preço R$" aria-label="Preço do produto" style="width:115px"><button class="btn small" type="submit">+ Adicionar</button></form>
-      <div class="config-list">${visible.length?visible.map(item=>`<div class="config-item"><div><strong>${esc(item.name)}</strong></div><div class="config-actions"><input class="input" type="number" min="0" step="0.01" value="${Number(item.price)||0}" aria-label="Preço de ${esc(item.name)}" onchange="saveConfigProductPrice(${item.index},this.value)" style="width:105px;padding:6px 8px"><button class="btn small" onclick="removeConfigProduct(${item.index},'${monthFilter}')">Excluir</button></div></div>`).join(""): `<div class="empty">Nenhum produto neste mês.</div>`}</div>
+      <div class="config-header"><h3>Meses Incluídos nos Relatórios</h3><button class="settings-toggle" type="button" data-topic="Meses incluídos nos relatórios" aria-label="Mostrar Meses incluídos nos relatórios" title="Mostrar Meses incluídos nos relatórios" aria-expanded="false" aria-controls="settingsMonthsContent" onclick="toggleSettingsTopic('settingsMonthsContent')">⌄</button></div>
+      <div id="settingsMonthsContent" class="config-topic-body" hidden><div class="report-month-years">${[...reportMonthsByYear].map(([year,yearMonths],index)=>`<details class="report-month-year" ${index===0?"open":""}><summary>${year}</summary><div class="report-month-options">${yearMonths.map(month=>`<label class="report-month-option"><input type="checkbox" value="${month}" ${selectedReportMonths.has(month)?"checked":""} onchange="setReportMonths()">${monthName(month)}</label>`).join("")}</div></details>`).join("")}</div></div>
+    </div>
+    <div class="config-panel">
+      <div class="config-header"><h3>Produtos Cadastrados</h3><button class="settings-toggle" type="button" data-topic="Produtos Cadastrados" aria-label="Mostrar Produtos Cadastrados" title="Mostrar Produtos Cadastrados" aria-expanded="false" aria-controls="settingsProductsContent" onclick="toggleSettingsTopic('settingsProductsContent')">⌄</button></div>
+      <div id="settingsProductsContent" class="config-topic-body" hidden>
+        <form onsubmit="event.preventDefault();addConfigProduct(this.name.value,this.price.value);this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><input class="input" name="name" placeholder="Ex.: Cone Doce de Leite" style="flex:1;min-width:180px"><input class="input" name="price" type="number" min="0" step="0.01" placeholder="Preço R$" aria-label="Preço do produto" style="width:115px"><button class="btn small" type="submit">+ Adicionar</button></form>
+        <div class="config-list">${visible.length?visible.map(item=>`<div class="config-item"><div><strong>${esc(item.name)}</strong></div><div class="config-actions"><input class="input" type="number" min="0" step="0.01" value="${Number(item.price)||0}" aria-label="Preço de ${esc(item.name)}" onchange="saveConfigProductPrice(${item.index},this.value)" style="width:105px;padding:6px 8px"><button class="btn small" onclick="removeConfigProduct(${item.index})">Excluir</button></div></div>`).join(""): `<div class="empty">Nenhum produto cadastrado.</div>`}</div>
+      </div>
+    </div>
+    <div class="config-panel">
+      <div class="config-header"><h3>Tipos Cadastrados</h3><button class="settings-toggle" type="button" data-topic="Tipos Cadastrados" aria-label="Mostrar Tipos Cadastrados" title="Mostrar Tipos Cadastrados" aria-expanded="false" aria-controls="settingsTypesContent" onclick="toggleSettingsTopic('settingsTypesContent')">⌄</button></div>
+      <div id="settingsTypesContent" class="config-topic-body" hidden>
+        <form onsubmit="event.preventDefault();addProductType(this.elements.type.value);this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><input class="input" name="type" placeholder="Ex.: Ingrediente, embalagem" required style="flex:1;min-width:180px"><button class="btn small" type="submit">+ Adicionar tipo</button></form>
+        <div class="config-list">${productTypes.length?productTypes.map((type,index)=>{const usage=getProductTypeUsage(type);return `<div class="config-item"><div><strong>${esc(type)}</strong><small>Quantidade média usada por produção</small></div><div class="config-actions"><input class="input config-type-amount" type="number" min="0" step="0.01" placeholder="0" value="${usage.quantity}" aria-label="Quantidade média usada por produção para ${esc(type)}" onchange="saveProductTypeUsage(${index},this.value,this.nextElementSibling.value)"><select class="select config-type-unit" aria-label="Unidade de consumo para ${esc(type)}" onchange="saveProductTypeUsage(${index},this.previousElementSibling.value,this.value)"><option value="unid" ${usage.unit==="unid"?"selected":""}>Unid.</option><option value="g" ${usage.unit==="g"?"selected":""}>g</option></select><button class="btn small" type="button" onclick="removeProductType(${index})">Excluir</button></div></div>`}).join(""): `<div class="empty">Nenhum tipo cadastrado.</div>`}</div>
+      </div>
     </div>
   </div>`)
 }
