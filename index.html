@@ -59,6 +59,7 @@ button{cursor:pointer}
   color:var(--pink-dark);font-weight:700;font-size:13px
 }
 .month span{background:#f8e2e8;padding:7px 28px;border-radius:3px}
+.mobile-month{display:none}
 .top-actions{display:flex;gap:8px}
 .icon-btn{
   border:0;border-radius:12px;width:48px;height:48px;
@@ -327,7 +328,11 @@ tbody tr:hover{background:#f8d4df}
 }
 @media(max-width:800px){
   .app{padding:12px}
-  .topbar{align-items:flex-start}.month{display:none}
+  .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+  .brand{grid-column:1/-1}
+  .month{display:none}
+  .top-actions{grid-column:2;grid-row:2}
+  .mobile-month{display:table;margin-top:4px;padding:3px 7px;border-radius:6px;background:#f8e2e8;color:var(--muted);font-size:10px;font-style:italic;text-align:left}
   .dashboard-grid,.kpis{grid-template-columns:repeat(2,1fr)}
   .order-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stock-kpis{grid-template-columns:repeat(2,1fr)}
@@ -371,6 +376,7 @@ tbody tr:hover{background:#f8d4df}
       <div>
         <h1>doce<span class="brand-heart">🩷</span>bia</h1>
         <small>Gestão & Fluxo de Caixa</small>
+        <div class="mobile-month" id="mobileMonthName"></div>
       </div>
     </div>
     <div class="month">PERÍODO: <span id="monthName">SETEMBRO</span></div>
@@ -583,7 +589,7 @@ function getReportMonths(){
 }
 function monthOf(date){return String(date||"").slice(0,7)}
 function setReportMonths(){
-  const selected=[...document.querySelectorAll("#reportMonthOptions input:checked")].map(input=>input.value).filter(validReportMonth);
+  const selected=[...document.querySelectorAll("#reportMonthOptions input:checked, .report-month-option input:checked")].map(input=>input.value).filter(validReportMonth);
   localStorage.setItem(REPORT_MONTHS_KEY,JSON.stringify([...new Set(selected)].sort()));
   monthLabel();
   refreshAll();
@@ -641,6 +647,10 @@ function monthLabel(){
   document.getElementById("monthName").textContent=months.length===1
     ?new Date(`${months[0]}-01T12:00:00`).toLocaleDateString("pt-BR",{month:"long",year:"numeric"}).toUpperCase()
     :months.length?`${months.length} MESES SELECIONADOS`:"NENHUM MÊS";
+  const mobileLabel=months.length===1
+    ?(()=>{const date=new Date(`${months[0]}-01T12:00:00`),month=date.toLocaleDateString("pt-BR",{month:"short"}).replace(/\./g,"");return `Período: ${month.charAt(0).toUpperCase()+month.slice(1)}/${String(date.getFullYear()).slice(-2)}`})()
+    :months.length?`Período +${months.length-1} ${months.length===2?"Mês":"Meses"}`:"Período: Nenhum mês";
+  document.getElementById("mobileMonthName").textContent=mobileLabel;
 }
 function statusProduct(p){if(p.stock<=0)return ["zero","Sem estoque"];return ["ok","Normal"]}
 function notify(message,error=false){
@@ -943,7 +953,7 @@ function openSettings(monthFilter="all"){
     </div>
     <div class="config-panel">
       <div class="config-header"><h3>Meses Incluídos nos Relatórios</h3><button class="settings-toggle" type="button" data-topic="Meses incluídos nos relatórios" aria-label="Mostrar Meses incluídos nos relatórios" title="Mostrar Meses incluídos nos relatórios" aria-expanded="false" aria-controls="settingsMonthsContent" onclick="toggleSettingsTopic('settingsMonthsContent')">⌄</button></div>
-      <div id="settingsMonthsContent" class="config-topic-body" hidden><div class="report-month-years">${[...reportMonthsByYear].map(([year,yearMonths],index)=>`<details class="report-month-year" ${index===0?"open":""}><summary>${year}</summary><div class="report-month-options">${yearMonths.map(month=>`<label class="report-month-option"><input type="checkbox" value="${month}" ${selectedReportMonths.has(month)?"checked":""} onchange="setReportMonths()">${monthName(month)}</label>`).join("")}</div></details>`).join("")}</div></div>
+      <div id="settingsMonthsContent" class="config-topic-body" hidden><div id="reportMonthOptions" class="report-month-years">${[...reportMonthsByYear].map(([year,yearMonths],index)=>`<details class="report-month-year" ${index===0?"open":""}><summary>${year}</summary><div class="report-month-options">${yearMonths.map(month=>`<label class="report-month-option"><input type="checkbox" value="${month}" ${selectedReportMonths.has(month)?"checked":""} onchange="setReportMonths()">${monthName(month)}</label>`).join("")}</div></details>`).join("")}</div></div>
     </div>
     <div class="config-panel">
       <div class="config-header"><h3>Produtos Cadastrados</h3><button class="settings-toggle" type="button" data-topic="Produtos Cadastrados" aria-label="Mostrar Produtos Cadastrados" title="Mostrar Produtos Cadastrados" aria-expanded="false" aria-controls="settingsProductsContent" onclick="toggleSettingsTopic('settingsProductsContent')">⌄</button></div>
