@@ -61,6 +61,16 @@ button{cursor:pointer}
 .month span{background:#f8e2e8;padding:7px 28px;border-radius:3px}
 .mobile-month{display:none}
 .top-actions{display:flex;gap:8px}
+.auth-screen{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:20px;background:linear-gradient(180deg,#fff 0,#fff7f8 48%,#fdf1f4 100%)}
+.auth-screen[hidden],.app[hidden]{display:none}
+.auth-card{width:min(100%,420px);padding:24px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.auth-card h2{margin:0 0 8px;color:var(--brown)}
+.auth-card p{margin:0 0 18px;color:var(--muted);font-size:13px}
+.auth-card label{display:block;margin:12px 0 5px;color:var(--brown-2);font-size:12px;font-weight:700}
+.auth-card input{width:100%}
+.auth-error{min-height:18px;margin-top:10px;color:var(--red);font-size:12px}
+.auth-switch{width:100%;margin-top:10px;border:0;background:transparent;color:var(--pink-dark);font-weight:700}
+.account-email{align-self:center;color:var(--muted);font-size:12px}
 .icon-btn{
   border:0;border-radius:12px;width:48px;height:48px;
   background:#fbe7ec;color:var(--pink-dark);font-size:22px;
@@ -369,7 +379,20 @@ tbody tr:hover{background:#f8d4df}
 </style>
 </head>
 <body>
-<div class="app">
+<section id="authScreen" class="auth-screen" hidden>
+  <form class="auth-card" id="authForm">
+    <h2 id="authTitle">Entrar</h2>
+    <p>Acesse sua conta para abrir a gestão Doce Bia.</p>
+    <label for="authEmail">E-mail</label>
+    <input class="input" id="authEmail" name="email" type="email" autocomplete="email" required>
+    <label for="authPassword">Senha</label>
+    <input class="input" id="authPassword" name="password" type="password" autocomplete="current-password" minlength="6" required>
+    <div id="authMessage" class="auth-error" role="status" aria-live="polite"></div>
+    <button class="btn" id="authSubmit" type="submit" style="width:100%">Entrar</button>
+    <button class="auth-switch" id="authModeToggle" type="button">Criar uma conta</button>
+  </form>
+</section>
+<div class="app" id="app" hidden>
   <header class="topbar">
     <div class="brand">
       <img class="logo" src="logo.png" alt="Logo Doce Bia">
@@ -381,8 +404,10 @@ tbody tr:hover{background:#f8d4df}
     </div>
     <div class="month">PERÍODO: <span id="monthName">SETEMBRO</span></div>
     <div class="top-actions">
+      <span class="account-email" id="accountEmail"></span>
       <button class="icon-btn" title="Configurações" onclick="openSettings()">⚙️</button>
       <button class="icon-btn active" title="Novo lançamento" onclick="openQuick()">🏷️</button>
+      <button class="btn secondary small" type="button" onclick="signOut()">Sair</button>
     </div>
   </header>
 
@@ -534,6 +559,8 @@ const isConfigured = () => !SUPABASE_URL.includes("COLE_AQUI") && !SUPABASE_ANON
 let db = {configProducts:[], products:[], orders:[], cash:[]};
 let loading = true;
 let confirmationAction = null;
+let currentUser = null;
+let authMode = "signin";
 
 function normalizeCashType(value){
   const raw=String(value ?? "").trim();
@@ -666,6 +693,7 @@ async function selectTable(table){
   if(error) throw error; return data||[];
 }
 async function loadDb(){
+  if(!currentUser)return;
   if(!isConfigured()){
     notify("Configure SUPABASE_URL e SUPABASE_ANON_KEY no index.html.",true);
     loading=false; refreshAll(); return;
@@ -678,7 +706,7 @@ async function loadDb(){
     db.products=products.map(x=>({...x,stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min??1),purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
     db.orders=orders.map(x=>({id:x.id,date:x.date,client:x.client,items:x.items||"",total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
     db.cash=cash.map(cashRowToLocal);
-    await migrateLegacyLocalStorageIfNeeded();
+    try{await migrateLegacyLocalStorageIfNeeded()}catch(error){notify("Erro ao migrar dados antigos: "+(error.message||error),true)}
     loading=false; refreshAll();
   }catch(error){
     loading=false; notify("Erro ao carregar o banco: "+(error.message||error),true); refreshAll();
@@ -688,13 +716,14 @@ async function loadDb(){
 async function migrateLegacyLocalStorageIfNeeded(){
   const raw=localStorage.getItem(KEY); if(!raw || localStorage.getItem(KEY+"_supabase_migrated")) return;
   let old; try{old=JSON.parse(raw)}catch{return}
-  if(!old || !Array.isArray(old.products) && !Array.isArray(old.orders) && !Array.isArray(old.cash)) return;
+  if(!old || !Array.isArray(old.configProducts) && !Array.isArray(old.products) && !Array.isArray(old.orders) && !Array.isArray(old.cash)) return;
   const empty=!db.products.length&&!db.orders.length&&!db.cash.length&&!db.configProducts.length;
   if(!empty) return;
-  const config=(old.configProducts||[]).map(item=>typeof item==="string"?{id:uid(),name:item,price:0,month:today().slice(0,7)}:{id:item.id||uid(),name:String(item.name||""),price:Number(item.price)||0,month:item.month||today().slice(0,7)});
-  const products=(old.products||[]).map(p=>({id:p.id||uid(),name:p.name||"",cat:p.cat||"",brand:p.brand||"",spec:p.spec||"",stock:Number(p.stock)||0,unit:p.unit||"unid",cost:Number(p.cost)||0,price:Number(p.price)||0,min:Number(p.min??1),purchase_date:p.purchaseDate||null,finished:Boolean(p.finished)}));
-  const orders=(old.orders||[]).map(o=>({id:o.id||uid(),date:o.date||today(),client:o.client||"",items:o.items||"",total:Number(o.total)||0,payment:o.payment||"",feito:Boolean(o.steps?.feito ?? (["Pronto","Entregue"].includes(o.status))),pago:Boolean(o.steps?.pago ?? (o.status==="Pago")),entregue:Boolean(o.steps?.entregue ?? (o.status==="Entregue"))}));
-  const cash=(old.cash||[]).map(c=>({id:c.id||uid(),date:c.date||today(),type:normalizeCashType(c.type||"Entrada"),desc:c.desc||c.description||c.descricao||"",cat:c.cat||"",method:c.method||"",value:Number(c.value)||0}));
+  const owner_id=currentUser.id;
+  const config=(old.configProducts||[]).map(item=>typeof item==="string"?{id:uid(),name:item,price:0,month:today().slice(0,7),owner_id}:{id:item.id||uid(),name:String(item.name||""),price:Number(item.price)||0,month:item.month||today().slice(0,7),owner_id});
+  const products=(old.products||[]).map(p=>({id:p.id||uid(),name:p.name||"",cat:p.cat||"",brand:p.brand||"",spec:p.spec||"",stock:Number(p.stock)||0,unit:p.unit||"unid",cost:Number(p.cost)||0,price:Number(p.price)||0,min:Number(p.min??1),purchase_date:p.purchaseDate||null,finished:Boolean(p.finished),owner_id}));
+  const orders=(old.orders||[]).map(o=>({id:o.id||uid(),date:o.date||today(),client:o.client||"",items:o.items||"",total:Number(o.total)||0,payment:o.payment||"",feito:Boolean(o.steps?.feito ?? (["Pronto","Entregue"].includes(o.status))),pago:Boolean(o.steps?.pago ?? (o.status==="Pago")),entregue:Boolean(o.steps?.entregue ?? (o.status==="Entregue")),owner_id}));
+  const cash=(old.cash||[]).map(c=>({id:c.id||uid(),date:c.date||today(),type:normalizeCashType(c.type||"Entrada"),desc:c.desc||c.description||c.descricao||"",cat:c.cat||"",method:c.method||"",value:Number(c.value)||0,owner_id}));
   const results=await Promise.all([
     config.length?sb.from("config_products").insert(config):Promise.resolve({error:null}),
     products.length?sb.from("products").insert(products):Promise.resolve({error:null}),
@@ -711,8 +740,8 @@ async function migrateLegacyLocalStorageIfNeeded(){
   notify("Dados antigos do navegador migrados para o Supabase.");
 }
 
-async function saveRow(table,row){const {error}=await sb.from(table).upsert(row,{onConflict:"id"});if(error)throw error}
-async function removeRow(table,id){const {error}=await sb.from(table).delete().eq("id",id);if(error)throw error}
+async function saveRow(table,row){if(!currentUser)throw new Error("Faça login para salvar os dados.");const {error}=await sb.from(table).upsert({...row,owner_id:currentUser.id},{onConflict:"id"});if(error)throw error}
+async function removeRow(table,id){if(!currentUser)throw new Error("Faça login para remover os dados.");const {error}=await sb.from(table).delete().eq("id",id);if(error)throw error}
 async function save(){refreshAll()}
 function refreshAll(){renderDashboard();renderStock();renderOrders();renderCash()}
 
@@ -996,8 +1025,77 @@ async function exportDrePdf(){
 }
 function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="backup-doce-gestao.json";a.click();URL.revokeObjectURL(a.href)}
 
+function setAuthMode(mode){
+  authMode=mode;
+  document.getElementById("authTitle").textContent=mode==="signup"?"Criar conta":"Entrar";
+  document.getElementById("authSubmit").textContent=mode==="signup"?"Criar conta":"Entrar";
+  document.getElementById("authModeToggle").textContent=mode==="signup"?"Já tenho uma conta":"Criar uma conta";
+  document.getElementById("authPassword").autocomplete=mode==="signup"?"new-password":"current-password";
+  document.getElementById("authMessage").textContent="";
+}
+function applyAuthSession(session){
+  const nextUser=session?.user||null,previousId=currentUser?.id;
+  currentUser=nextUser;
+  document.getElementById("authScreen").hidden=Boolean(nextUser);
+  document.getElementById("app").hidden=!nextUser;
+  document.getElementById("accountEmail").textContent=nextUser?.email||"";
+  if(!nextUser){
+    db={configProducts:[],products:[],orders:[],cash:[]};
+    loading=true;
+    return;
+  }
+  if(previousId!==nextUser.id){
+    db={configProducts:[],products:[],orders:[],cash:[]};
+    loading=true;
+    void loadDb();
+  }
+}
+async function initializeAuth(){
+  sb.auth.onAuthStateChange((event,session)=>{
+    if(event==="SIGNED_IN"||event==="SIGNED_OUT")applyAuthSession(session);
+  });
+  if(!isConfigured()){
+    document.getElementById("authMessage").textContent="Configure SUPABASE_URL e SUPABASE_ANON_KEY no index.html.";
+    return;
+  }
+  const {data,error}=await sb.auth.getSession();
+  if(error){
+    document.getElementById("authMessage").textContent="Erro ao verificar a sessão: "+error.message;
+    return;
+  }
+  applyAuthSession(data.session);
+}
+async function submitAuth(event){
+  event.preventDefault();
+  const form=event.currentTarget,email=form.elements.email.value.trim(),password=form.elements.password.value;
+  const message=document.getElementById("authMessage"),submit=document.getElementById("authSubmit");
+  message.textContent="";
+  submit.disabled=true;
+  try{
+    const result=authMode==="signup"
+      ?await sb.auth.signUp({email,password})
+      :await sb.auth.signInWithPassword({email,password});
+    if(result.error)throw result.error;
+    if(authMode==="signup"&&!result.data.session){
+      message.textContent="Conta criada. Confirme seu e-mail antes de entrar.";
+    }else{
+      message.textContent="Login realizado.";
+    }
+  }catch(error){
+    message.textContent=error.message||"Não foi possível autenticar.";
+  }finally{
+    submit.disabled=false;
+  }
+}
+async function signOut(){
+  const {error}=await sb.auth.signOut();
+  if(error)notify("Erro ao sair: "+error.message,true);
+}
+
+document.getElementById("authForm").addEventListener("submit",submitAuth);
+document.getElementById("authModeToggle").addEventListener("click",()=>setAuthMode(authMode==="signup"?"signin":"signup"));
 document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));btn.classList.add("active");document.getElementById(btn.dataset.section).classList.add("active");refreshAll()}));
-monthLabel();refreshAll();loadDb();
+monthLabel();refreshAll();initializeAuth();
 </script>
 </body>
 </html>
