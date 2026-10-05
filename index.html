@@ -69,7 +69,7 @@ button{cursor:pointer}
 .icon-btn.active{background:#e66b91;color:#fff}
 .config-layout{display:grid;gap:14px;padding:16px}
 .config-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
-.config-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.config-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer}
 .config-header h3{margin:0;font-size:15px;color:var(--brown)}
 .settings-toggle{display:grid;width:30px;height:30px;place-items:center;padding:0;border:0;border-radius:6px;background:#f3e3e6;color:#82435a;font-size:16px;font-weight:900}
 .config-topic-body[hidden]{display:none}
@@ -316,6 +316,10 @@ tbody tr:hover{background:#f8d4df}
 .dre-row span{font-size:12px}
 .dre-row strong{font-size:15px;white-space:nowrap}
 .dre-subtotal span,.dre-subtotal strong{font-weight:800}
+.dre-highlight-income{background:#f1f7ed}
+.dre-highlight-expenses{background:#fcf0f0}
+.dre-highlight-net{background:#fff7e5}
+.dre-highlight-income,.dre-highlight-expenses,.dre-highlight-net{border-radius:7px;margin-top:4px}
 .dre-result{margin-top:8px;border-top:2px solid var(--brown);border-bottom:0}
 .dre-result span{font-weight:900}
 .dre-result strong{font-size:20px}
@@ -488,13 +492,13 @@ tbody tr:hover{background:#f8d4df}
             <div class="dre-row"><span>Saldo inicial (mês anterior)</span><strong id="dreOpeningBalance">R$ 0,00</strong></div>
             <div class="dre-row"><span>Entradas do caixa</span><strong class="cash-positive" id="dreCashIncome">R$ 0,00</strong></div>
             <div class="dre-row"><span>Entradas de pedidos pagos</span><strong class="cash-positive" id="dreOrderIncome">R$ 0,00</strong></div>
-            <div class="dre-row dre-subtotal"><span>Total de entradas</span><strong class="cash-positive" id="cashIn2">R$ 0,00</strong></div>
+            <div class="dre-row dre-subtotal dre-highlight-income"><span>Total de Entradas</span><strong class="cash-positive" id="cashIn2">R$ 0,00</strong></div>
             <div class="dre-row"><span>Saídas do caixa</span><strong class="cash-negative" id="dreCashExpenses">R$ 0,00</strong></div>
             <div class="dre-row"><span>Despesas do estoque</span><strong class="cash-negative" id="dreStockExpenses">R$ 0,00</strong></div>
-            <div class="dre-row dre-subtotal"><span>Total de despesas</span><strong class="cash-negative" id="cashOut2">R$ 0,00</strong></div>
-            <div class="dre-row"><span>Resultado antes do retorno</span><strong id="dreBeforeReturn">R$ 0,00</strong></div>
+            <div class="dre-row dre-subtotal dre-highlight-expenses"><span>Total de Despesas</span><strong class="cash-negative" id="cashOut2">R$ 0,00</strong></div>
+            <div class="dre-row dre-highlight-net"><span>Total de Despesas (-) Ganhos</span><strong id="dreBeforeReturn">R$ 0,00</strong></div>
             <div class="dre-row"><span id="dreReturnLabel">Retorno ao caixa (40%)</span><strong class="cash-negative" id="dreCashReturn">R$ 0,00</strong></div>
-            <div class="dre-row dre-subtotal"><span>Resultado líquido do mês</span><strong id="cashBalance2">R$ 0,00</strong></div>
+            <div class="dre-row dre-subtotal dre-highlight-net"><span>Resultado Líquido do Mês</span><strong id="cashBalance2">R$ 0,00</strong></div>
             <div class="dre-row dre-result"><span>Saldo final (levado ao próximo mês)</span><strong id="dreClosingBalance">R$ 0,00</strong></div>
             <p class="dre-note">Entradas incluem lançamentos do caixa e pedidos pagos; despesas incluem saídas do caixa e custos cadastrados no estoque.</p>
             <button class="btn" style="width:100%;margin-top:16px" onclick="exportDrePdf()">📄 Exportar DRE em PDF</button>
@@ -569,6 +573,16 @@ function cashRowToDb(row){
 }
 
 function money(v){return brl(v)}
+function capitalizeName(value){
+  const particles=new Set(["de","da","do"]);
+  return String(value??"").trim().toLocaleLowerCase("pt-BR").replace(/(^|[\s'-])(\p{L}+)/gu,(_,separator,word)=>separator+(particles.has(word)?word:word.charAt(0).toLocaleUpperCase("pt-BR")+word.slice(1)));
+}
+function capitalizeOrderItems(value){
+  return String(value??"").split(/\s*\|\s*/).map(item=>{
+    const match=item.match(/^(\s*\d+\s*x\s*)(.*)$/i);
+    return match?`${match[1]}${capitalizeName(match[2])}`:capitalizeName(item);
+  }).join(" | ");
+}
 function getCashReturnPercent(){const stored=localStorage.getItem(CASH_RETURN_KEY);if(stored===null)return 40;const percent=Number(stored);return Number.isFinite(percent)&&percent>=0&&percent<=100?percent:40}
 function validReportMonth(value){return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(value||""))}
 function getSelectedReportMonths(){
@@ -599,10 +613,10 @@ function getProductTypes(){
   let types;
   if(stored===null) types=db.products.map(product=>product.cat);
   else{try{types=JSON.parse(stored)}catch{return []}}
-  return [...new Set((Array.isArray(types)?types:[]).map(type=>String(type||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+  return [...new Set((Array.isArray(types)?types:[]).map(capitalizeName).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
 }
 function addProductType(value){
-  const type=String(value||"").trim();
+  const type=capitalizeName(value);
   if(!type)return;
   const types=getProductTypes();
   if(types.some(item=>item.toLocaleLowerCase("pt-BR")===type.toLocaleLowerCase("pt-BR"))){notify("Esse tipo já está cadastrado.",true);return}
@@ -674,9 +688,9 @@ async function loadDb(){
     const [configProducts,products,orders,cash]=await Promise.all([
       selectTable("config_products"),selectTable("products"),selectTable("orders"),selectTable("cash")
     ]);
-    db.configProducts=configProducts.map(x=>({name:String(x.name||""),price:Number(x.price)||0,month:x.month||today().slice(0,7),id:x.id}));
-    db.products=products.map(x=>({...x,stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min??1),purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
-    db.orders=orders.map(x=>({id:x.id,date:x.date,client:x.client,items:x.items||"",total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
+    db.configProducts=configProducts.map(x=>({name:capitalizeName(x.name),price:Number(x.price)||0,month:x.month||today().slice(0,7),id:x.id}));
+    db.products=products.map(x=>({...x,name:capitalizeName(x.name),cat:capitalizeName(x.cat),brand:capitalizeName(x.brand),stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min??1),purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
+    db.orders=orders.map(x=>({id:x.id,date:x.date,client:capitalizeName(x.client),items:capitalizeOrderItems(x.items),total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
     db.cash=cash.map(cashRowToLocal);
     try{await migrateLegacyLocalStorageIfNeeded()}catch(error){notify("Erro ao migrar dados antigos: "+(error.message||error),true)}
     loading=false; refreshAll();
@@ -691,9 +705,9 @@ async function migrateLegacyLocalStorageIfNeeded(){
   if(!old || !Array.isArray(old.configProducts) && !Array.isArray(old.products) && !Array.isArray(old.orders) && !Array.isArray(old.cash)) return;
   const empty=!db.products.length&&!db.orders.length&&!db.cash.length&&!db.configProducts.length;
   if(!empty) return;
-  const config=(old.configProducts||[]).map(item=>typeof item==="string"?{id:uid(),name:item,price:0,month:today().slice(0,7)}:{id:item.id||uid(),name:String(item.name||""),price:Number(item.price)||0,month:item.month||today().slice(0,7)});
-  const products=(old.products||[]).map(p=>({id:p.id||uid(),name:p.name||"",cat:p.cat||"",brand:p.brand||"",spec:p.spec||"",stock:Number(p.stock)||0,unit:p.unit||"unid",cost:Number(p.cost)||0,price:Number(p.price)||0,min:Number(p.min??1),purchase_date:p.purchaseDate||null,finished:Boolean(p.finished)}));
-  const orders=(old.orders||[]).map(o=>({id:o.id||uid(),date:o.date||today(),client:o.client||"",items:o.items||"",total:Number(o.total)||0,payment:o.payment||"",feito:Boolean(o.steps?.feito ?? (["Pronto","Entregue"].includes(o.status))),pago:Boolean(o.steps?.pago ?? (o.status==="Pago")),entregue:Boolean(o.steps?.entregue ?? (o.status==="Entregue"))}));
+  const config=(old.configProducts||[]).map(item=>typeof item==="string"?{id:uid(),name:capitalizeName(item),price:0,month:today().slice(0,7)}:{id:item.id||uid(),name:capitalizeName(item.name),price:Number(item.price)||0,month:item.month||today().slice(0,7)});
+  const products=(old.products||[]).map(p=>({id:p.id||uid(),name:capitalizeName(p.name),cat:capitalizeName(p.cat),brand:capitalizeName(p.brand),spec:p.spec||"",stock:Number(p.stock)||0,unit:p.unit||"unid",cost:Number(p.cost)||0,price:Number(p.price)||0,min:Number(p.min??1),purchase_date:p.purchaseDate||null,finished:Boolean(p.finished)}));
+  const orders=(old.orders||[]).map(o=>({id:o.id||uid(),date:o.date||today(),client:capitalizeName(o.client),items:capitalizeOrderItems(o.items),total:Number(o.total)||0,payment:o.payment||"",feito:Boolean(o.steps?.feito ?? (["Pronto","Entregue"].includes(o.status))),pago:Boolean(o.steps?.pago ?? (o.status==="Pago")),entregue:Boolean(o.steps?.entregue ?? (o.status==="Entregue"))}));
   const cash=(old.cash||[]).map(c=>({id:c.id||uid(),date:c.date||today(),type:normalizeCashType(c.type||"Entrada"),desc:c.desc||c.description||c.descricao||"",cat:c.cat||"",method:c.method||"",value:Number(c.value)||0}));
   const results=await Promise.all([
     config.length?sb.from("config_products").insert(config):Promise.resolve({error:null}),
@@ -704,9 +718,9 @@ async function migrateLegacyLocalStorageIfNeeded(){
   const failed=results.find(r=>r.error); if(failed?.error) throw failed.error;
   localStorage.setItem(KEY+"_supabase_migrated","1");
   const [configProducts,products2,orders2,cash2]=await Promise.all([selectTable("config_products"),selectTable("products"),selectTable("orders"),selectTable("cash")]);
-  db.configProducts=configProducts.map(x=>({id:x.id,name:x.name,price:Number(x.price)||0,month:x.month}));
-  db.products=products2.map(x=>({...x,stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min??1),purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
-  db.orders=orders2.map(x=>({id:x.id,date:x.date,client:x.client,items:x.items,total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
+  db.configProducts=configProducts.map(x=>({id:x.id,name:capitalizeName(x.name),price:Number(x.price)||0,month:x.month}));
+  db.products=products2.map(x=>({...x,name:capitalizeName(x.name),cat:capitalizeName(x.cat),brand:capitalizeName(x.brand),stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min??1),purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
+  db.orders=orders2.map(x=>({id:x.id,date:x.date,client:capitalizeName(x.client),items:capitalizeOrderItems(x.items),total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
   db.cash=cash2.map(cashRowToLocal);
   notify("Dados antigos do navegador migrados para o Supabase.");
 }
@@ -871,7 +885,7 @@ function openProduct(id){
   const typeOptions=types.map(type=>`<option value="${esc(type)}" ${type===p.cat?"selected":""}>${esc(type)}</option>`).join("");
   openModal(id?"Editar produto":"Novo produto",`<form class="form" onsubmit="saveProduct(event,'${id||""}')"><div class="field"><label>Produto</label><input class="input" name="name" required value="${esc(p.name)}"></div><div class="field"><label>Tipo</label><select class="select" name="type"><option value="">Selecione um tipo</option>${typeOptions}</select></div><div class="field full"><label>Especificação</label><input class="input" name="spec" value="${esc(p.spec)}" placeholder="Ex.: Pacote 1kg / 250ml / Unidade"></div><div class="field"><label>Marca</label><input class="input" name="brand" value="${esc(p.brand)}" placeholder="Marca do produto"></div><div class="field"><label>Quantidade</label><input class="input" name="stock" type="number" step="1" required value="${Math.round(Number(p.stock)||0)}"></div><div class="field"><label>Data da compra do estoque</label><input class="input" name="purchaseDate" type="date" value="${esc(p.purchaseDate)}"></div><div class="field"><label>Unidade</label><select class="select" name="unit"><option ${p.unit==="unid"?"selected":""}>unid</option><option ${p.unit==="kg"?"selected":""}>kg</option><option ${p.unit==="g"?"selected":""}>g</option><option ${p.unit==="L"?"selected":""}>L</option><option ${p.unit==="cx"?"selected":""}>cx</option></select></div><div class="field"><label>Custo</label><input class="input" name="cost" type="number" step="0.01" value="${p.cost}"></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn">Salvar produto</button></div></form>`)
 }
-async function saveProduct(e,id){e.preventDefault();const f=new FormData(e.target),existing=db.products.find(p=>p.id===id),obj={id:id||uid(),name:f.get("name"),cat:f.get("type"),brand:f.get("brand"),spec:f.get("spec"),stock:Math.round(Number(f.get("stock"))||0),purchase_date:f.get("purchaseDate")||null,unit:f.get("unit"),cost:+f.get("cost")||0,price:existing?.price||0,min:existing?.min??1,finished:existing?.finished??false};try{await saveRow("products",obj);const local={...obj,purchaseDate:obj.purchase_date||""};if(id)db.products=db.products.map(p=>p.id===id?local:p);else db.products.push(local);closeModal();save();notify("Produto salvo.")}catch(e){notify("Erro ao salvar produto: "+e.message,true)}}
+async function saveProduct(e,id){e.preventDefault();const f=new FormData(e.target),existing=db.products.find(p=>p.id===id),obj={id:id||uid(),name:capitalizeName(f.get("name")),cat:capitalizeName(f.get("type")),brand:capitalizeName(f.get("brand")),spec:f.get("spec"),stock:Math.round(Number(f.get("stock"))||0),purchase_date:f.get("purchaseDate")||null,unit:f.get("unit"),cost:+f.get("cost")||0,price:existing?.price||0,min:existing?.min??1,finished:existing?.finished??false};try{await saveRow("products",obj);const local={...obj,purchaseDate:obj.purchase_date||""};if(id)db.products=db.products.map(p=>p.id===id?local:p);else db.products.push(local);closeModal();save();notify("Produto salvo.")}catch(e){notify("Erro ao salvar produto: "+e.message,true)}}
 async function deleteProduct(id){const product=db.products.find(item=>item.id===id);if(!product)return;askConfirmation("Excluir produto",`Tem certeza de que deseja excluir <b>${esc(product.name)}</b>?`,"Excluir produto",async()=>{try{await removeRow("products",id);db.products=db.products.filter(item=>item.id!==id);save();notify("Produto excluído.")}catch(e){notify("Erro ao excluir produto: "+e.message,true)}})}
 
 function openOrder(id){
@@ -885,8 +899,14 @@ window.addOrderItemRow=function(quantity=1,selectedName=""){
   const container=document.getElementById("orderItemRows");if(!container)return;const products=Array.isArray(db.configProducts)?db.configProducts:[];const options=products.map(item=>`<option value="${esc(item.name)}" ${item.name===selectedName?"selected":""}>${esc(item.name)}</option>`).join("");const legacyOption=selectedName&&!products.some(item=>item.name===selectedName)?`<option value="${esc(selectedName)}" selected>${esc(selectedName)}</option>`:"";const row=document.createElement("div");row.className="order-item-row";row.innerHTML=`<input class="input order-item-quantity" type="number" min="1" step="1" value="${esc(quantity)}" aria-label="Qntd Itens" oninput="updateOrderTotal()"><select class="select" aria-label="Item do pedido" onchange="updateOrderTotal()"><option value="">Selecione um produto</option>${options}${legacyOption}</select>`;container.appendChild(row);updateOrderTotal()
 };
 window.updateOrderTotal=function(){const total=[...document.querySelectorAll("#orderItemRows .order-item-row")].reduce((sum,row)=>{const q=Math.max(1,Number(row.querySelector("input").value)||1),name=row.querySelector("select").value,product=db.configProducts.find(item=>item.name===name);return sum+q*(product?Number(product.price)||0:0)},0);const input=document.querySelector('#modalBody input[name="total"]');if(input)input.value=total.toFixed(2)};
-async function saveOrder(e,id){e.preventDefault();const f=new FormData(e.target);const itemsRaw=[...document.querySelectorAll("#orderItemRows .order-item-row")].map(row=>{const q=Math.max(1,parseInt(row.querySelector("input").value,10)||1),name=row.querySelector("select").value;return name?`${q}x ${name}`:""}).filter(Boolean).join(" | ");const obj={id:id||uid(),date:f.get("date"),client:f.get("client"),items:itemsRaw,total:+f.get("total")||0,payment:f.get("payment")||"",feito:f.has("feito"),pago:f.has("pago"),entregue:f.has("entregue")};try{await saveRow("orders",obj);const local={id:obj.id,date:obj.date,client:obj.client,items:obj.items,total:obj.total,payment:obj.payment,steps:{feito:obj.feito,pago:obj.pago,entregue:obj.entregue}};if(id)db.orders=db.orders.map(o=>o.id===id?local:o);else db.orders.push(local);closeModal();save();notify("Pedido salvo.")}catch(e){notify("Erro ao salvar pedido: "+e.message,true)}}
-async function deleteOrder(id){const order=db.orders.find(item=>item.id===id);if(!order)return;askConfirmation("Excluir pedido",`Tem certeza de que deseja excluir o pedido <b>#${esc(id.slice(-5).toUpperCase())}</b>?`,"Excluir pedido",async()=>{try{await removeRow("orders",id);db.orders=db.orders.filter(item=>item.id!==id);save();notify("Pedido excluído.")}catch(e){notify("Erro ao excluir pedido: "+e.message,true)}})}
+async function saveOrder(e,id){e.preventDefault();const f=new FormData(e.target);const itemsRaw=[...document.querySelectorAll("#orderItemRows .order-item-row")].map(row=>{const q=Math.max(1,parseInt(row.querySelector("input").value,10)||1),name=row.querySelector("select").value;return name?`${q}x ${name}`:""}).filter(Boolean).join(" | ");const obj={id:id||uid(),date:f.get("date"),client:capitalizeName(f.get("client")),items:itemsRaw,total:+f.get("total")||0,payment:f.get("payment")||"",feito:f.has("feito"),pago:f.has("pago"),entregue:f.has("entregue")};try{await saveRow("orders",obj);const local={id:obj.id,date:obj.date,client:obj.client,items:obj.items,total:obj.total,payment:obj.payment,steps:{feito:obj.feito,pago:obj.pago,entregue:obj.entregue}};if(id)db.orders=db.orders.map(o=>o.id===id?local:o);else db.orders.push(local);closeModal();save();notify("Pedido salvo.")}catch(e){notify("Erro ao salvar pedido: "+e.message,true)}}
+async function deleteOrder(id){
+  const order=db.orders.find(item=>item.id===id);if(!order)return;
+  askConfirmation("Excluir pedido",`Excluir o pedido de <b>${esc(order.client)}</b>?`,"Excluir pedido",async()=>{
+    try{await removeRow("orders",id);db.orders=db.orders.filter(item=>item.id!==id);save();notify("Pedido excluído.")}
+    catch(e){notify("Erro ao excluir pedido: "+e.message,true)}
+  });
+}
 
 function openCash(id){
   const entry=db.cash.find(item=>item.id===id)||{id:"",date:today(),type:"Entrada",desc:"",cat:"Vendas",method:"Pix",value:0};
@@ -922,7 +942,7 @@ async function deleteCash(id){
 function openQuick(){openModal("O que deseja cadastrar?",`<div style="padding:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px"><button class="btn" onclick="closeModal();openProduct()">📦<br>Novo produto</button><button class="btn" onclick="closeModal();openOrder()">🧁<br>Novo pedido</button></div>`)}
 
 async function addConfigProduct(name,price,monthFilter="all"){
-  const value=String(name||"").trim();if(!value)return;const month=monthFilter&&monthFilter!=="all"?monthFilter:today().slice(0,7);if(db.configProducts.some(item=>item.name===value&&item.month===month))return;const row={id:uid(),name:value,price:Number(price)||0,month};try{await saveRow("config_products",row);db.configProducts.push(row);openSettings(monthFilter);notify("Produto de pedido adicionado.")}catch(e){notify("Erro ao adicionar produto: "+e.message,true)}}
+  const value=capitalizeName(name);if(!value)return;const month=monthFilter&&monthFilter!=="all"?monthFilter:today().slice(0,7);if(db.configProducts.some(item=>item.name===value&&item.month===month))return;const row={id:uid(),name:value,price:Number(price)||0,month};try{await saveRow("config_products",row);db.configProducts.push(row);openSettings(monthFilter);notify("Produto de pedido adicionado.")}catch(e){notify("Erro ao adicionar produto: "+e.message,true)}}
 async function saveConfigProductPrice(index,price){const product=db.configProducts[index];if(!product)return;product.price=Math.max(0,Number(price)||0);try{await saveRow("config_products",product);refreshAll();notify("Preço atualizado.")}catch(e){notify("Erro ao atualizar preço: "+e.message,true)}}
 async function removeConfigProduct(index,monthFilter="all"){const product=db.configProducts[index];if(!product)return;try{await removeRow("config_products",product.id);db.configProducts=db.configProducts.filter(item=>item.id!==product.id);openSettings(monthFilter);notify("Produto removido.")}catch(e){notify("Erro ao remover produto: "+e.message,true)}}
 function toggleSettingsTopic(id){
@@ -944,7 +964,7 @@ function openSettings(monthFilter="all"){
   const productTypes=getProductTypes();
   openModal("Configurações",`<div class="config-layout">
     <div class="config-panel">
-      <div class="config-header"><h3>Retorno ao Caixa</h3><button class="settings-toggle" type="button" data-topic="Retorno ao Caixa" aria-label="Mostrar Retorno ao Caixa" title="Mostrar Retorno ao Caixa" aria-expanded="false" aria-controls="settingsReturnContent" onclick="toggleSettingsTopic('settingsReturnContent')">⌄</button></div>
+      <div class="config-header" onclick="toggleSettingsTopic('settingsReturnContent')"><h3>Retorno ao Caixa</h3><button class="settings-toggle" type="button" data-topic="Retorno ao Caixa" aria-label="Mostrar Retorno ao Caixa" title="Mostrar Retorno ao Caixa" aria-expanded="false" aria-controls="settingsReturnContent">⌄</button></div>
       <div id="settingsReturnContent" class="config-topic-body" hidden>
         <form onsubmit="event.preventDefault();saveCashReturnPercent(this.returnPercent.value,'${monthFilter}')" style="display:flex;align-items:end;gap:8px;flex-wrap:wrap">
           <div class="field" style="flex:1;min-width:180px"><label for="cashReturnPercent">Percentual destinado ao caixa (%)</label><input class="input" id="cashReturnPercent" name="returnPercent" type="number" min="0" max="100" step="0.01" value="${getCashReturnPercent()}" required></div>
@@ -953,18 +973,18 @@ function openSettings(monthFilter="all"){
       </div>
     </div>
     <div class="config-panel">
-      <div class="config-header"><h3>Meses Incluídos nos Relatórios</h3><button class="settings-toggle" type="button" data-topic="Meses incluídos nos relatórios" aria-label="Mostrar Meses incluídos nos relatórios" title="Mostrar Meses incluídos nos relatórios" aria-expanded="false" aria-controls="settingsMonthsContent" onclick="toggleSettingsTopic('settingsMonthsContent')">⌄</button></div>
+      <div class="config-header" onclick="toggleSettingsTopic('settingsMonthsContent')"><h3>Meses Incluídos nos Relatórios</h3><button class="settings-toggle" type="button" data-topic="Meses incluídos nos relatórios" aria-label="Mostrar Meses incluídos nos relatórios" title="Mostrar Meses incluídos nos relatórios" aria-expanded="false" aria-controls="settingsMonthsContent">⌄</button></div>
       <div id="settingsMonthsContent" class="config-topic-body" hidden><div id="reportMonthOptions" class="report-month-years">${[...reportMonthsByYear].map(([year,yearMonths],index)=>`<details class="report-month-year" ${index===0?"open":""}><summary>${year}</summary><div class="report-month-options">${yearMonths.map(month=>`<label class="report-month-option"><input type="checkbox" value="${month}" ${selectedReportMonths.has(month)?"checked":""} onchange="setReportMonths()">${monthName(month)}</label>`).join("")}</div></details>`).join("")}</div></div>
     </div>
     <div class="config-panel">
-      <div class="config-header"><h3>Produtos Cadastrados</h3><button class="settings-toggle" type="button" data-topic="Produtos Cadastrados" aria-label="Mostrar Produtos Cadastrados" title="Mostrar Produtos Cadastrados" aria-expanded="false" aria-controls="settingsProductsContent" onclick="toggleSettingsTopic('settingsProductsContent')">⌄</button></div>
+      <div class="config-header" onclick="toggleSettingsTopic('settingsProductsContent')"><h3>Produtos Cadastrados</h3><button class="settings-toggle" type="button" data-topic="Produtos Cadastrados" aria-label="Mostrar Produtos Cadastrados" title="Mostrar Produtos Cadastrados" aria-expanded="false" aria-controls="settingsProductsContent">⌄</button></div>
       <div id="settingsProductsContent" class="config-topic-body" hidden>
         <form onsubmit="event.preventDefault();addConfigProduct(this.name.value,this.price.value);this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><input class="input" name="name" placeholder="Ex.: Cone Doce de Leite" style="flex:1;min-width:180px"><input class="input" name="price" type="number" min="0" step="0.01" placeholder="Preço R$" aria-label="Preço do produto" style="width:115px"><button class="btn small" type="submit">+ Adicionar</button></form>
         <div class="config-list">${visible.length?visible.map(item=>`<div class="config-item"><div><strong>${esc(item.name)}</strong></div><div class="config-actions"><input class="input" type="number" min="0" step="0.01" value="${Number(item.price)||0}" aria-label="Preço de ${esc(item.name)}" onchange="saveConfigProductPrice(${item.index},this.value)" style="width:105px;padding:6px 8px"><button class="btn small" onclick="removeConfigProduct(${item.index})">Excluir</button></div></div>`).join(""): `<div class="empty">Nenhum produto cadastrado.</div>`}</div>
       </div>
     </div>
     <div class="config-panel">
-      <div class="config-header"><h3>Tipos Cadastrados</h3><button class="settings-toggle" type="button" data-topic="Tipos Cadastrados" aria-label="Mostrar Tipos Cadastrados" title="Mostrar Tipos Cadastrados" aria-expanded="false" aria-controls="settingsTypesContent" onclick="toggleSettingsTopic('settingsTypesContent')">⌄</button></div>
+      <div class="config-header" onclick="toggleSettingsTopic('settingsTypesContent')"><h3>Tipos Cadastrados</h3><button class="settings-toggle" type="button" data-topic="Tipos Cadastrados" aria-label="Mostrar Tipos Cadastrados" title="Mostrar Tipos Cadastrados" aria-expanded="false" aria-controls="settingsTypesContent">⌄</button></div>
       <div id="settingsTypesContent" class="config-topic-body" hidden>
         <form onsubmit="event.preventDefault();addProductType(this.elements.type.value);this.reset();" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><input class="input" name="type" placeholder="Ex.: Ingrediente, embalagem" required style="flex:1;min-width:180px"><button class="btn small" type="submit">+ Adicionar tipo</button></form>
         <div class="config-list">${productTypes.length?productTypes.map((type,index)=>{const usage=getProductTypeUsage(type);return `<div class="config-item"><div><strong>${esc(type)}</strong><small>Quantidade média usada por produção</small></div><div class="config-actions"><input class="input config-type-amount" type="number" min="0" step="0.01" placeholder="0" value="${usage.quantity}" aria-label="Quantidade média usada por produção para ${esc(type)}" onchange="saveProductTypeUsage(${index},this.value,this.nextElementSibling.value)"><select class="select config-type-unit" aria-label="Unidade de consumo para ${esc(type)}" onchange="saveProductTypeUsage(${index},this.previousElementSibling.value,this.value)"><option value="unid" ${usage.unit==="unid"?"selected":""}>Unid.</option><option value="g" ${usage.unit==="g"?"selected":""}>g</option></select><button class="btn small" type="button" onclick="removeProductType(${index})">Excluir</button></div></div>`}).join(""): `<div class="empty">Nenhum tipo cadastrado.</div>`}</div>
