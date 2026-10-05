@@ -80,6 +80,10 @@ button{cursor:pointer}
 .config-actions{display:flex;gap:8px;flex-wrap:wrap}
 .config-type-amount{width:100px;padding:6px 8px}
 .config-type-unit{width:72px;padding:6px 8px}
+.task-title.completed{text-decoration:line-through;color:var(--muted)}
+.task-checkbox{width:20px;height:20px;accent-color:var(--green);cursor:pointer}
+.task-kind{display:inline-flex;padding:4px 9px;border-radius:20px;background:var(--pink-soft);color:var(--pink-dark);font-size:11px;font-weight:800}
+.task-overdue{color:var(--red);font-weight:800}
 
 .nav{
   display:flex;gap:7px;align-items:center;margin:5px 0 13px;
@@ -394,6 +398,7 @@ tbody tr:hover{background:#f8d4df}
     <button class="active" data-section="dashboard">📊 Dashboard</button>
     <button data-section="estoque">📦 Estoque</button>
     <button data-section="pedidos">🧁 Pedidos</button>
+    <button data-section="tarefas">📝 Tarefas</button>
     <button data-section="caixa">💰 Fluxo de Caixa</button>
   </nav>
 
@@ -456,6 +461,28 @@ tbody tr:hover{background:#f8d4df}
           <button class="btn" onclick="openOrder()">+ Novo pedido</button>
         </div>
         <div id="orderCards" class="order-cards"></div>
+      </div>
+    </section>
+
+    <section id="tarefas" class="section">
+      <div class="panel">
+        <div class="panel-title">LISTA DE TAREFAS E IDEIAS</div>
+        <div class="toolbar">
+          <div class="filters">
+            <select class="select" id="taskFilter" onchange="renderTasks()">
+              <option value="">Todas</option>
+              <option value="pending">Pendentes</option>
+              <option value="completed">Realizadas</option>
+            </select>
+          </div>
+          <button class="btn" type="button" onclick="openTask()">+ Nova tarefa ou ideia</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Realizado</th><th>Tarefa ou ideia</th><th>Tipo</th><th>Data de conclusão</th><th>Ações</th></tr></thead>
+            <tbody id="taskTable"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -535,7 +562,7 @@ const today = () => new Date().toISOString().slice(0,10);
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const isConfigured = () => !SUPABASE_URL.includes("COLE_AQUI") && !SUPABASE_ANON_KEY.includes("COLE_AQUI");
 
-let db = {configProducts:[], products:[], orders:[], cash:[]};
+let db = {configProducts:[], products:[], orders:[], cash:[], tasks:[]};
 let loading = true;
 let confirmationAction = null;
 
@@ -692,6 +719,12 @@ async function loadDb(){
     db.products=products.map(x=>({...x,name:capitalizeName(x.name),cat:capitalizeName(x.cat),brand:capitalizeName(x.brand),stock:Number(x.stock)||0,cost:Number(x.cost)||0,price:Number(x.price)||0,min:Number(x.min??1),purchaseDate:x.purchase_date||"",finished:Boolean(x.finished)}));
     db.orders=orders.map(x=>({id:x.id,date:x.date,client:capitalizeName(x.client),items:capitalizeOrderItems(x.items),total:Number(x.total)||0,payment:x.payment||"",steps:{feito:Boolean(x.feito),pago:Boolean(x.pago),entregue:Boolean(x.entregue)}}));
     db.cash=cash.map(cashRowToLocal);
+    try{
+      const tasks=await selectTable("tasks");
+      db.tasks=tasks.map(x=>({id:x.id,title:String(x.title||""),kind:x.kind==="Ideia"?"Ideia":"Tarefa",dueDate:x.due_date||"",completed:Boolean(x.completed)}));
+    }catch(error){
+      notify(`Não foi possível carregar tarefas. Execute supabase-rls.sql no Supabase: ${error.message||error}`,true);
+    }
     try{await migrateLegacyLocalStorageIfNeeded()}catch(error){notify("Erro ao migrar dados antigos: "+(error.message||error),true)}
     loading=false; refreshAll();
   }catch(error){
@@ -728,7 +761,7 @@ async function migrateLegacyLocalStorageIfNeeded(){
 async function saveRow(table,row){const {error}=await sb.from(table).upsert(row,{onConflict:"id"});if(error)throw error}
 async function removeRow(table,id){const {error}=await sb.from(table).delete().eq("id",id);if(error)throw error}
 async function save(){refreshAll()}
-function refreshAll(){renderDashboard();renderStock();renderOrders();renderCash()}
+function refreshAll(){renderDashboard();renderStock();renderOrders();renderCash();renderTasks()}
 
 function getMonthlyCashSummary(month){
   const cashRows=db.cash.filter(item=>monthOf(item.date)===month);
@@ -938,6 +971,42 @@ async function deleteCash(id){
   }catch(e){
     notify("Erro ao excluir lançamento: "+e.message,true);
   }
+}
+function renderTasks(){
+  const filter=document.getElementById("taskFilter")?.value||"";
+  const tasks=[...(db.tasks||[])].filter(task=>!filter||(filter==="completed"?task.completed:!task.completed))
+    .sort((a,b)=>Number(a.completed)-Number(b.completed)||String(a.dueDate).localeCompare(String(b.dueDate))||a.title.localeCompare(b.title,"pt-BR"));
+  document.getElementById("taskTable").innerHTML=tasks.map(task=>{
+    const overdue=!task.completed&&task.dueDate&&task.dueDate<today();
+    return `<tr><td><input class="task-checkbox" type="checkbox" ${task.completed?"checked":""} aria-label="Marcar ${esc(task.title)} como realizado" onchange="toggleTaskCompleted('${task.id}',this.checked)"></td><td><span class="task-title ${task.completed?"completed":""}">${esc(task.title)}</span></td><td><span class="task-kind">${task.kind}</span></td><td class="${overdue?"task-overdue":""}">${formatDate(task.dueDate)}${overdue?" · Atrasada":""}</td><td><div class="stock-actions"><button class="btn small secondary order-icon-btn" type="button" aria-label="Editar tarefa" title="Editar" onclick="openTask('${task.id}')">✎</button><button class="btn small order-icon-btn" type="button" aria-label="Excluir tarefa" title="Excluir" onclick="deleteTask('${task.id}')">🗑</button></div></td></tr>`;
+  }).join("")||`<tr><td colspan="5" class="empty">Nenhuma tarefa ou ideia cadastrada.</td></tr>`;
+}
+function openTask(id=""){
+  const task=db.tasks.find(item=>item.id===id)||{title:"",kind:"Tarefa",dueDate:today(),completed:false};
+  openModal(id?"Editar tarefa ou ideia":"Nova tarefa ou ideia",`<form class="form" onsubmit="saveTask(event,'${id}')"><div class="field full"><label for="taskTitle">Tarefa ou ideia</label><input class="input" id="taskTitle" name="title" maxlength="200" value="${esc(task.title)}" required></div><div class="field"><label for="taskKind">Tipo</label><select class="select" id="taskKind" name="kind"><option ${task.kind==="Tarefa"?"selected":""}>Tarefa</option><option ${task.kind==="Ideia"?"selected":""}>Ideia</option></select></div><div class="field"><label for="taskDueDate">Data de conclusão</label><input class="input" id="taskDueDate" name="dueDate" type="date" value="${esc(task.dueDate)}" required></div><div class="modal-footer field full"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn" type="submit">Salvar</button></div></form>`);
+}
+async function saveTask(event,id){
+  event.preventDefault();
+  const form=new FormData(event.currentTarget),existing=db.tasks.find(task=>task.id===id);
+  const task={id:id||uid(),title:String(form.get("title")||"").trim(),kind:form.get("kind")==="Ideia"?"Ideia":"Tarefa",dueDate:String(form.get("dueDate")||""),completed:existing?.completed||false};
+  try{
+    await saveRow("tasks",{id:task.id,title:task.title,kind:task.kind,due_date:task.dueDate,completed:task.completed});
+    if(id)db.tasks=db.tasks.map(item=>item.id===id?task:item);else db.tasks.push(task);
+    closeModal();save();notify("Tarefa salva.");
+  }catch(error){notify("Erro ao salvar tarefa: "+error.message,true)}
+}
+async function toggleTaskCompleted(id,completed){
+  const task=db.tasks.find(item=>item.id===id);if(!task)return;
+  const previous=task.completed;task.completed=completed;renderTasks();
+  try{await saveRow("tasks",{id:task.id,title:task.title,kind:task.kind,due_date:task.dueDate,completed});notify(completed?"Tarefa marcada como realizada.":"Tarefa marcada como pendente.")}
+  catch(error){task.completed=previous;renderTasks();notify("Erro ao atualizar tarefa: "+error.message,true)}
+}
+function deleteTask(id){
+  const task=db.tasks.find(item=>item.id===id);if(!task)return;
+  askConfirmation("Excluir tarefa",`Excluir <b>${esc(task.title)}</b>?`,"Excluir",async()=>{
+    try{await removeRow("tasks",id);db.tasks=db.tasks.filter(item=>item.id!==id);save();notify("Tarefa excluída.")}
+    catch(error){notify("Erro ao excluir tarefa: "+error.message,true)}
+  });
 }
 function openQuick(){openModal("O que deseja cadastrar?",`<div style="padding:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px"><button class="btn" onclick="closeModal();openProduct()">📦<br>Novo produto</button><button class="btn" onclick="closeModal();openOrder()">🧁<br>Novo pedido</button></div>`)}
 
