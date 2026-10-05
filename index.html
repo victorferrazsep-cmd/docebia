@@ -726,7 +726,7 @@ function getMonthlyCashSummary(month){
   const orderIncome=paidOrders.reduce((sum,order)=>sum+(Number(order.total)||0),0);
   const stockExpenses=products.reduce((sum,product)=>sum+(Number(product.cost)||0),0);
   const totalIncome=cashIncome+orderIncome,totalExpenses=cashExpenses+stockExpenses;
-  const returnPercent=getCashReturnPercent(),cashReturn=totalIncome*returnPercent/100;
+  const returnPercent=getCashReturnPercent(),cashReturn=orderIncome*returnPercent/100;
   return {cashRows,orders,paidOrders,products,cashIncome,cashExpenses,orderIncome,stockExpenses,totalIncome,totalExpenses,cashReturn,monthlyResult:totalIncome-totalExpenses-cashReturn,movementCount:cashRows.length+paidOrders.length+products.filter(product=>(Number(product.cost)||0)>0).length};
 }
 function getConsolidatedCashSummary(months){
@@ -742,9 +742,10 @@ function getOpeningCashBalance(month){
   const previousCash=db.cash.filter(item=>monthOf(item.date)<month);
   const previousIncome=previousCash.filter(item=>normalizeCashType(item.type)==="Entrada").reduce((sum,item)=>sum+(Number(item.value)||0),0)
     +db.orders.filter(order=>monthOf(order.date)<month&&order.steps.pago).reduce((sum,order)=>sum+(Number(order.total)||0),0);
+  const previousSales=db.orders.filter(order=>monthOf(order.date)<month&&order.steps.pago).reduce((sum,order)=>sum+(Number(order.total)||0),0);
   const previousExpenses=previousCash.filter(item=>normalizeCashType(item.type)==="Saída").reduce((sum,item)=>sum+(Number(item.value)||0),0)
     +db.products.filter(product=>monthOf(product.purchaseDate)<month).reduce((sum,product)=>sum+(Number(product.cost)||0),0);
-  return previousIncome-previousExpenses-previousIncome*getCashReturnPercent()/100;
+  return previousIncome-previousExpenses-previousSales*getCashReturnPercent()/100;
 }
 function getDashboardCashBalance(months){
   if(!months.length) return 0;
@@ -832,7 +833,7 @@ function renderCash(){
   document.getElementById("dreOpeningBalance").textContent=money(openingBalance);
   document.getElementById("dreCashIncome").textContent=money(cashIncome);document.getElementById("dreOrderIncome").textContent=money(orderIncome);document.getElementById("cashIn2").textContent=money(totalIncome);
   document.getElementById("dreCashExpenses").textContent=money(cashExpenses);document.getElementById("dreStockExpenses").textContent=money(stockExpenses);document.getElementById("cashOut2").textContent=money(totalExpenses);
-  document.getElementById("dreBeforeReturn").textContent=money(preReturn);document.getElementById("dreReturnLabel").textContent=`Índice de Retenção dos Lucros - Retorno ao Caixa (${returnPercent}%)`;document.getElementById("dreCashReturn").textContent=money(cashReturn);
+  document.getElementById("dreBeforeReturn").textContent=money(preReturn);document.getElementById("dreReturnLabel").textContent=`Retorno ao caixa sobre vendas pagas (${returnPercent}%)`;document.getElementById("dreCashReturn").textContent=money(cashReturn);
   const result=document.getElementById("cashBalance2");result.textContent=money(monthlyResult);result.classList.toggle("cash-positive",monthlyResult>=0);result.classList.toggle("cash-negative",monthlyResult<0);
   const closing=document.getElementById("dreClosingBalance");closing.textContent=money(closingBalance);closing.classList.toggle("cash-positive",closingBalance>=0);closing.classList.toggle("cash-negative",closingBalance<0);
 
@@ -858,8 +859,8 @@ function toggleCashPanel(){
 function openModal(title,body){document.getElementById("modalTitle").textContent=title;document.getElementById("modalBody").innerHTML=body;document.getElementById("modal").classList.add("show")}
 function closeModal(){confirmationAction=null;document.getElementById("modal").classList.remove("show")}
 function askConfirmation(title,message,buttonText,action){
-  if(typeof action === "function") action();
-  confirmationAction=null;
+  confirmationAction=action;
+  openModal(title,`<div role="alertdialog" aria-modal="true" aria-labelledby="modalTitle"><div style="padding:18px 17px">${message}</div><div class="modal-footer"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button type="button" class="btn" style="background:var(--red)" onclick="runConfirmation()">${esc(buttonText)}</button></div></div>`);
 }
 async function runConfirmation(){const action=confirmationAction;closeModal();if(action)await action()}
 
